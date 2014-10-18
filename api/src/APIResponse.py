@@ -7,6 +7,9 @@ def signature(token, signature, timestamp, nonce, echostr):
         return False
     array = [token, timestamp, nonce]
     array.sort()
-    sha1_str = hashlib.sha1(ArrayUtil.StrArraySplice(array))
+    splice_str =  ArrayUtil.StrArraySplice(array)
+    sha1= hashlib.sha1()
+    sha1.update(splice_str)
+    sha1_str = sha1.hexdigest()
     return sha1_str == signature
 

@@ -1,9 +1,9 @@
 def StrArraySplice(array):
     if array is None:
         return None
-    if array.length == 0:
+    if len(array) == 0:
         return None
-    resultStr
+    resultStr = ''
     for str in array:
         resultStr += str
     return resultStr
