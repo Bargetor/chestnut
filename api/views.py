@@ -6,7 +6,6 @@ from django.http import HttpResponse
 
 def index(request):
     if request.method == 'GET':
-        print 'get'
         signature = request.GET.get('signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
