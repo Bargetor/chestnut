@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from api.src import APIResponse
 from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
-
+@csrf_exempt
 def index(request):
     if request.method == 'GET':
         signature = request.GET.get('signature')
