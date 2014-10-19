@@ -5,7 +5,7 @@ from django.http import HttpResponse
 # Create your views here.
 
 def index(request):
-    if request.TYPE is 'GET':
+    if request.method == 'GET':
         signature = request.GET.get('signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
@@ -14,6 +14,6 @@ def index(request):
             return render(request, 'api/index.html', {'signature' : signature})
         else:
             return render(request, 'api/index.html', {'signature' : 'False'})
-        if request.TYPE is 'POST':
+        if request.method == 'POST':
             print(request.POST)
             return HttpResponse(request.POST)
