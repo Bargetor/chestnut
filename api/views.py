@@ -15,4 +15,5 @@ def index(request):
         else:
             return render(request, 'api/index.html', {'signature' : 'False'})
         if request.TYPE is 'POST':
+            print(request.POST)
             return HttpResponse(request.POST)
