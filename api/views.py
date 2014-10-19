@@ -10,10 +10,11 @@ def index(request):
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
         echostr = request.GET.get('echostr')
+        print echostr
         if APIResponse.signature('bargetor_chestnut', signature, timestamp, nonce, echostr):
             return render(request, 'api/index.html', {'signature' : signature})
         else:
             return render(request, 'api/index.html', {'signature' : 'False'})
         if request.method == 'POST':
-            print(request.POST)
+            print request.POST
             return HttpResponse(request.POST)
