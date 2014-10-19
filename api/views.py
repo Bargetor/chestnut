@@ -6,6 +6,7 @@ from django.http import HttpResponse
 
 def index(request):
     if request.method == 'GET':
+        print 'get'
         signature = request.GET.get('signature')
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
@@ -14,4 +15,5 @@ def index(request):
             return render(request, 'api/index.html', {'signature' : signature})
         else:
             return render(request, 'api/index.html', {'signature' : signature})
-
+    if request.method == 'POST':
+        return HttpResponse(request.POST['HTTP_RAW_POST_DATA'])
