@@ -2,10 +2,6 @@ import hashlib
 from common import ArrayUtil
 
 
-POST_DATA_NAME = 'HTTP_RAW_POST_DATA'
-
-
-
 def signature(token, signature, timestamp, nonce, echostr):
     if token is None or signature is None or timestamp is None or nonce is None or echostr is None:
         return False
