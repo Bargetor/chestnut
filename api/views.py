@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from api.src import APIResponse
+from api.src import APIRequest
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -11,7 +11,7 @@ def index(request):
         timestamp = request.GET.get('timestamp')
         nonce = request.GET.get('nonce')
         echostr = request.GET.get('echostr')
-        if APIResponse.signature('bargetor_chestnut', signature, timestamp, nonce, echostr):
+        if APIRequest.signature('bargetor_chestnut', signature, timestamp, nonce, echostr):
             return render(request, 'api/index.html', {'signature' : signature})
         else:
             return render(request, 'api/index.html', {'signature' : signature})
