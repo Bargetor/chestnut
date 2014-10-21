@@ -1,0 +1,32 @@
+POST_DATA_NAME = 'HTTP_RAW_POST_DATA'
+
+
+POST_DATA_MSG_TYPE_TEXT = 'text'
+POST_DATA_MSG_TYPE_IMAGE = 'image'
+POST_DATA_MSG_TYPE_VOICE = 'voice'
+POST_DATA_MSG_TYPE_VIDEO = 'video'
+POST_DATA_MSG_TYPE_LOCATION = 'location'
+POST_DATA_MSG_TYPE_LINK = 'link'
+
+POST_DATA_TAG_NAME_MSG_TYPE = 'MsgType'
+POST_DATA_TAG_NAME_TO_USER_NAME = 'ToUserName'
+POST_DATA_TAG_NAME_FROM_USER_NAME = 'FromUserName'
+POST_DATA_TAG_NAME_CREATE_TIME = 'CreateTime'
+POST_DATA_TAG_NAME_MSG_ID = 'MsgId'
+POST_DATA_TAG_NAME_CONTENT = 'Content'
+POST_DATA_TAG_NAME_PIC_URL = 'PicUrl'
+POST_DATA_TAG_NAME_MEDIA_ID = 'MediaId'
+POST_DATA_TAG_NAME_FORMAT = 'Format'
+POST_DATA_TAG_NAME_THUMB_MEDIA_ID = 'ThumbMediaId'
+POST_DATA_TAG_NAME_LOCATION_X = 'Location_X'
+POST_DATA_TAG_NAME_LOCATION_Y = 'Location_Y'
+POST_DATA_TAG_NAME_LABEL = 'Label'
+POST_DATA_TAG_NAME_SCALE = 'Scale'
+POST_DATA_TAG_NAME_TITLE = 'Title'
+POST_DATA_TAG_NAME_DESCRIPTION = 'Description'
+POST_DATA_TAG_NAME_URL = 'Url'
+
+request_parsers = [
+                    {"name":"api.src.APIParser.SignatureRequestParser"},
+                    {"name":"api.src.APIParser.MessageRequestParser"},
+                  ]

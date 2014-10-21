@@ -1,6 +1,6 @@
 import xml.etree.cElementTree as ET
 
-def parseFromStr(xml_str):
+def parse_from_str(xml_str):
     try:
         tree = ET.fromstring(xml_str)
         return tree
@@ -8,7 +8,7 @@ def parseFromStr(xml_str):
         print e
         return None
 
-def getChildrenTagName(element):
+def get_children_tag_name(element):
     if element is None:
         return None
     result = []
@@ -16,7 +16,7 @@ def getChildrenTagName(element):
         result.append(child.tag)
     return result
 
-def getChildrenTextDic(element):
+def get_children_text_dic(element):
     if element is None:
         return None
     result = {}

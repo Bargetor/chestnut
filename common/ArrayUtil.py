@@ -1,4 +1,4 @@
-def StrArraySplice(array):
+def str_array_splice(array):
     if array is None:
         return None
     if len(array) == 0:
