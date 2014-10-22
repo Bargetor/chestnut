@@ -1,3 +1,4 @@
+import traceback
 # def get_class_for_full_name(class_full_name):
 #     if not class_full_name:
 #         return None
@@ -29,6 +30,7 @@ def get_class_for_full_name(class_full_name):
         return clazz
     except Exception, e:
         print e
+        traceback.print_exc()
         return None
 
 def get_module(parent_module, child_module_name):

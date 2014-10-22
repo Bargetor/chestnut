@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import hashlib
 from common import ArrayUtil, XMLUtil
 from api.APISettings import *
@@ -29,7 +30,7 @@ class APIRequestData(object):
 
     def __parse_xml_data(self):
         etree = XMLUtil.parse_from_str(self.request_post_xml_data)
-        self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree)
+        self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree, CHARSET)
 
 
 
@@ -64,9 +65,9 @@ class BaseAPIRequest(object):
         self.from_user_name = None
         self.create_time = None
         self.msg_type = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
+    def __load_request_data(self, request_data):
         self.to_user_name = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_TO_USER_NAME)
         self.from_user_name = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_FROM_USER_NAME)
         self.create_time = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_CREATE_TIME)
@@ -78,11 +79,9 @@ class MessageAPIRequest(BaseAPIRequest):
         super(MessageAPIRequest, self).__init__(request_data)
 
         self.msg_id = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(MessageAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.msg_id = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_ID)
 
 
@@ -92,11 +91,9 @@ class TextAPIRequest(MessageAPIRequest):
         super(TextAPIRequest, self).__init__(request_data)
 
         self.content = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(TextAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.content = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_CONTENT)
 
 class MediaAPIRequest(MessageAPIRequest):
@@ -104,11 +101,9 @@ class MediaAPIRequest(MessageAPIRequest):
         super(MediaAPIRequest, self).__init__(request_data)
 
         self.media_id = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(MediaAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.media_id = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MEDIA_ID)
 
 class PicAPIRequest(MediaAPIRequest):
@@ -117,12 +112,11 @@ class PicAPIRequest(MediaAPIRequest):
         super(PicAPIRequest, self).__init__(request_data)
 
         self.pic_url = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(PicAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.pic_url = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_PIC_URL)
+
 
 class VoiceAPIRequest(MediaAPIRequest):
     """docstring for VoiceAPIRequest"""
@@ -130,11 +124,9 @@ class VoiceAPIRequest(MediaAPIRequest):
         super(VoiceAPIRequest, self).__init__(request_data)
 
         self.format = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(VoiceAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.format = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_FORMAT)
 
 class VideoAPIRequest(MediaAPIRequest):
@@ -143,11 +135,9 @@ class VideoAPIRequest(MediaAPIRequest):
         super(VideoAPIRequest, self).__init__(request_data)
 
         self.thumb_media_id = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(VideoAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.thumb_media_id = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_THUMB_MEDIA_ID)
 
 class LocationAPIRequest(MessageAPIRequest):
@@ -159,11 +149,9 @@ class LocationAPIRequest(MessageAPIRequest):
         self.location_y = None
         self.scale = None
         self.label = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(LocationAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.location_x = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_LOCATION_X)
         self.location_y = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_LOCATION_Y)
         self.label = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_LABEL)
@@ -177,11 +165,9 @@ class LinkAPIRequest(MessageAPIRequest):
         self.title = None
         self.description = None
         self.url = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 
-    def load_request_data(self, request_data):
-        super(LinkAPIRequest, self).load_request_data(request_data)
-
+    def __load_request_data(self, request_data):
         self.title = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_TITLE)
         self.description = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_DESCRIPTION)
         self.url = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_URL)
@@ -192,5 +178,5 @@ class EventAPIRequest(BaseAPIRequest):
         super(EventAPIRequest, self).__init__(request_data)
 
         self.event = None
-        self.load_request_data(request_data)
+        self.__load_request_data(request_data)
 

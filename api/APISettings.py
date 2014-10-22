@@ -26,7 +26,25 @@ POST_DATA_TAG_NAME_TITLE = 'Title'
 POST_DATA_TAG_NAME_DESCRIPTION = 'Description'
 POST_DATA_TAG_NAME_URL = 'Url'
 
-request_parsers = [
-                    {"name":"api.src.APIParser.SignatureRequestParser"},
-                    {"name":"api.src.APIParser.MessageRequestParser"},
-                  ]
+REQUEST_PARSER_CONFIG_NAME = 'parser'
+REQUEST_RESPONSER_CONFIG_NAME = 'responser'
+REQUEST_LISTENER_CONFIG_NAME = 'listener'
+
+request_processer_list = [
+                            {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.SignatureRequestParser",
+                             REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.SignatureAPIResponse",
+                             REQUEST_LISTENER_CONFIG_NAME:[
+                                "",
+                             ]},
+
+                             {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.MessageRequestParser",
+                              REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.MessageAPIResponse",
+                              REQUEST_LISTENER_CONFIG_NAME:[
+                                 "",
+                             ]},
+                          ]
+
+
+CHARSET = 'utf-8'
+
+MY_WECHAT_TOKEN = 'bargetor_chestnut'

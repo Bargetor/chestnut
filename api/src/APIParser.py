@@ -29,23 +29,22 @@ class MessageRequestParser(BaseAPIParser):
             request_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_TYPE)
             if not request_type:
                 return super(MessageRequestParser, self).parse(request_data)
-            print request_type
             if request_type == POST_DATA_MSG_TYPE_TEXT:
                 return TextAPIRequest(request_data)
 
-            if request_data == POST_DATA_MSG_TYPE_IMAGE:
+            if request_type == POST_DATA_MSG_TYPE_IMAGE:
                 return PicAPIRequest(request_data)
 
-            if request_data == POST_DATA_MSG_TYPE_VIDEO:
+            if request_type == POST_DATA_MSG_TYPE_VIDEO:
                 return VideoAPIRequest(request_data)
 
-            if request_data == POST_DATA_MSG_TYPE_VOICE:
+            if request_type == POST_DATA_MSG_TYPE_VOICE:
                 return VoiceAPIRequest(request_data)
 
-            if request_data == POST_DATA_MSG_TYPE_LOCATION:
+            if request_type == POST_DATA_MSG_TYPE_LOCATION:
                 return LocationAPIRequest(request_data)
 
-            if request_data == POST_DATA_MSG_TYPE_LINK:
+            if request_type == POST_DATA_MSG_TYPE_LINK:
                 return LinkAPIRequest(request_data)
 
             return super(MessageRequestParser, self).parse(request_data)
