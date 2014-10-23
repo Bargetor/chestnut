@@ -3,19 +3,6 @@ import hashlib
 from common import ArrayUtil, XMLUtil
 from api.APISettings import *
 
-
-def signature(token, signature, timestamp, nonce, echostr):
-    if token is None or signature is None or timestamp is None or nonce is None or echostr is None:
-        return False
-    array = [token, timestamp, nonce]
-    array.sort()
-    splice_str =  ArrayUtil.str_array_splice(array)
-    sha1= hashlib.sha1()
-    sha1.update(splice_str)
-    sha1_str = sha1.hexdigest()
-    return sha1_str == signature
-
-
 class APIRequestData(object):
     """docstring for APIRequestData"""
     def __init__(self, http_request):
@@ -32,6 +19,8 @@ class APIRequestData(object):
         etree = XMLUtil.parse_from_str(self.request_post_xml_data)
         self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree, CHARSET)
 
+    def __str__(self):
+        return self.request_post_xml_dic
 
 
 class SignatureAPIRequest(object):
@@ -176,7 +165,20 @@ class EventAPIRequest(BaseAPIRequest):
     """docstring for EventAPIRequest"""
     def __init__(self, request_data):
         super(EventAPIRequest, self).__init__(request_data)
-
         self.event = None
         self.__load_request_data(request_data)
+
+    def __load_request_data(self, request_data):
+        self.event = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_EVENT)
+
+class SubscribeEventAPIRequest(EventAPIRequest):
+    """docstring for subscribeEventAPIRequest"""
+    def __init__(self, request_data):
+        super(SubscribeEventAPIRequest, self).__init__(request_data)
+
+
+class UnSubscribeEventAPIRequest(EventAPIRequest):
+    """docstring for UnSubscribeEventAPIRequest"""
+    def __init__(self, request_data):
+        super(UnSubscribeEventAPIRequest, self).__init__(request_data)
 

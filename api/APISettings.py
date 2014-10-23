@@ -1,13 +1,5 @@
 POST_DATA_NAME = 'HTTP_RAW_POST_DATA'
 
-
-POST_DATA_MSG_TYPE_TEXT = 'text'
-POST_DATA_MSG_TYPE_IMAGE = 'image'
-POST_DATA_MSG_TYPE_VOICE = 'voice'
-POST_DATA_MSG_TYPE_VIDEO = 'video'
-POST_DATA_MSG_TYPE_LOCATION = 'location'
-POST_DATA_MSG_TYPE_LINK = 'link'
-
 POST_DATA_TAG_NAME_MSG_TYPE = 'MsgType'
 POST_DATA_TAG_NAME_TO_USER_NAME = 'ToUserName'
 POST_DATA_TAG_NAME_FROM_USER_NAME = 'FromUserName'
@@ -25,6 +17,20 @@ POST_DATA_TAG_NAME_SCALE = 'Scale'
 POST_DATA_TAG_NAME_TITLE = 'Title'
 POST_DATA_TAG_NAME_DESCRIPTION = 'Description'
 POST_DATA_TAG_NAME_URL = 'Url'
+POST_DATA_TAG_NAME_EVENT = 'Event'
+POST_DATA_TAG_NAME_EVENT_KEY = 'EventKey'
+POST_DATA_TAG_NAME_TICKET = 'Ticket'
+
+POST_DATA_MSG_TYPE_TEXT = 'text'
+POST_DATA_MSG_TYPE_IMAGE = 'image'
+POST_DATA_MSG_TYPE_VOICE = 'voice'
+POST_DATA_MSG_TYPE_VIDEO = 'video'
+POST_DATA_MSG_TYPE_LOCATION = 'location'
+POST_DATA_MSG_TYPE_LINK = 'link'
+POST_DATA_MSG_TYPE_EVENT = 'event'
+
+POST_DATA_EVENT_TYPE_SUBSCRIBE = 'subscribe'
+POST_DATA_EVENT_TYPE_UNSUBSCRIBE = 'unsubscribe'
 
 REQUEST_PARSER_CONFIG_NAME = 'parser'
 REQUEST_RESPONSER_CONFIG_NAME = 'responser'
@@ -39,6 +45,11 @@ request_processer_list = [
 
                              {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.MessageRequestParser",
                               REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.MessageAPIResponse",
+                              REQUEST_LISTENER_CONFIG_NAME:[
+                                 "",
+                             ]},
+                             {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.EventRequestParser",
+                              REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.EventAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "",
                              ]},

@@ -49,4 +49,27 @@ class MessageRequestParser(BaseAPIParser):
 
             return super(MessageRequestParser, self).parse(request_data)
 
+class EventRequestParser(BaseAPIParser):
+    """docstring for EventRequestParser"""
+    def __init__(self):
+        super(EventRequestParser, self).__init__()
 
+    def parse(self, request_data):
+        if request_data.request_method == "POST":
+            request_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_TYPE)
+            if not request_type:
+                return super(EventRequestParser, self).parse(request_data)
+            if request_type != POST_DATA_MSG_TYPE_EVENT:
+                return super(EventRequestParser, self).parse(request_data)
+
+            event_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_EVENT)
+            if not event_type:
+                return super(EventRequestParser, self).parse(request_data)
+
+            if event_type == POST_DATA_EVENT_TYPE_SUBSCRIBE:
+                return SubscribeEventAPIRequest(request_data)
+
+            if event_type == POST_DATA_EVENT_TYPE_UNSUBSCRIBE:
+                return UnSubscribeEventAPIRequest(request_data)
+
+            return super(EventRequestParser, self).parse(request_data)

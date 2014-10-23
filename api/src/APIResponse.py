@@ -43,3 +43,12 @@ class MessageAPIResponse(BaseAPIResponse):
             return super(MessageAPIResponse, self).response(request)
         return request.msg_id
 
+class EventAPIResponse(BaseAPIResponse):
+    """docstring for EventAPIResponse"""
+    def __init__(self):
+        super(EventAPIResponse, self).__init__()
+
+    def response(self, request):
+        if not request:
+            return super(EventAPIResponse, self).response(request)
+        return request.event
