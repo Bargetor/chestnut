@@ -53,6 +53,8 @@ def write_text_child(root, tag_name, text):
     e.text = text
     root.append(e)
     return root
+def to_etree_xml_str(etree):
+    return ET.tostring(etree.getroot())
 
 def CDATA(text=None):
     element = ET.Element('![CDATA[')

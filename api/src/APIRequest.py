@@ -20,7 +20,11 @@ class APIRequestData(object):
         self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree, CHARSET)
 
     def __str__(self):
-        return self.request_post_xml_dic
+        return self.request_post_xml_dic.tostring()
+
+    def __unicode__(self):
+        return self.request_post_xml_dic.tostring()
+
 
 
 class SignatureAPIRequest(object):
