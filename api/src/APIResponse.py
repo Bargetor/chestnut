@@ -45,7 +45,7 @@ class MessageAPIResponse(BaseAPIResponse):
         if not request:
             return super(MessageAPIResponse, self).response(request)
         response_data = TextResponseXMLData(request)
-        response_data.content = "HAHA"
+        response_data.content = "hello, this's great system, it's called chestnut!"
         return response_data.get_xml_str()
 
 class EventAPIResponse(BaseAPIResponse):
