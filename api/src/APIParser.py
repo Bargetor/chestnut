@@ -15,7 +15,7 @@ class SignatureRequestParser(BaseAPIParser):
         super(SignatureRequestParser, self).__init__()
 
     def parse(self, request_data):
-        if request_data.request_method == "POST" and request_data.request_get_data.get('signature'):
+        if request_data.request_get_data.get('echostr'):
             return SignatureAPIRequest(request_data)
         return super(SignatureRequestParser, self).parse(request_data)
 
