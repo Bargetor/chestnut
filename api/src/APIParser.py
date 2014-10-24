@@ -58,6 +58,8 @@ class EventRequestParser(BaseAPIParser):
 
     def parse(self, request_data):
         if request_data.request_method == "POST":
+            if not request_data.request_post_xml_dic:
+                return super(EventRequestParser, self).parse(request_data)
             request_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_TYPE)
             if not request_type:
                 return super(EventRequestParser, self).parse(request_data)
