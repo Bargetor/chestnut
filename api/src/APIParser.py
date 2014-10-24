@@ -15,7 +15,7 @@ class SignatureRequestParser(BaseAPIParser):
         super(SignatureRequestParser, self).__init__()
 
     def parse(self, request_data):
-        if request_data.request_method == "GET":
+        if request_data.request_method == "POST" and request_data.request_get_data['signature']:
             return SignatureAPIRequest(request_data)
         return super(SignatureRequestParser, self).parse(request_data)
 
@@ -26,6 +26,8 @@ class MessageRequestParser(BaseAPIParser):
 
     def parse(self, request_data):
         if request_data.request_method == "POST":
+            if not request_data.request_post_xml_dic:
+                return super(MessageRequestParser, self).parse(request_data)
             request_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_TYPE)
             if not request_type:
                 return super(MessageRequestParser, self).parse(request_data)
