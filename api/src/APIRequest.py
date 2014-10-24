@@ -10,7 +10,8 @@ class APIRequestData(object):
 
         self.request_method = http_request.method
         self.request_get_data = http_request.GET
-        self.request_post_xml_data = http_request.POST.get(POST_DATA_NAME)
+        # self.request_post_xml_data = http_request.POST.get(POST_DATA_NAME)
+        self.request_post_xml_data = http_request.body
         self.request_post_xml_dic = None
 
         self.__parse_xml_data()
