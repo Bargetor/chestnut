@@ -41,6 +41,9 @@ def get_new_etree(root_name):
     etree._setroot(root)
     return etree
 
+def get_new_element(element_name):
+    return ET.Element(element_name)
+
 def write_cdata_text_child(root, tag_name, text):
     e = ET.Element(tag_name)
     cdata = CDATA(text)
