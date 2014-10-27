@@ -21,10 +21,10 @@ class APIRequestData(object):
         self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree, CHARSET)
 
     def __str__(self):
-        return self.request_post_xml_dic.tostring()
+        return "%s %s %s" % (self.request_method, self.request_get_data, self.request_post_xml_data)
 
     def __unicode__(self):
-        return self.request_post_xml_dic.tostring()
+        return self.__str__()
 
 
 
@@ -187,3 +187,27 @@ class UnSubscribeEventAPIRequest(EventAPIRequest):
     def __init__(self, request_data):
         super(UnSubscribeEventAPIRequest, self).__init__(request_data)
 
+class QRSceneEventAPIRequest(EventAPIRequest):
+    """docstring for QRSceneEventAPIRequest"""
+    def __init__(self, request_data):
+        super(QRSceneEventAPIRequest, self).__init__(request_data)
+
+        self.event_key = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_EVENT_KEY)
+        self.ticket = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_TICKET)
+
+class LocationEventAPIRequest(EventAPIRequest):
+    """docstring for LocationEventAPIRequest"""
+    def __init__(self, request_data):
+        super(LocationEventAPIRequest, self).__init__(request_data)
+
+        self.latitude = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_LATITUDE)
+        self.longitude = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_LONGITUDE)
+        self.precision = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_PRECISION)
+
+
+class CustomMenuEventAPIRequest(EventAPIRequest):
+    """docstring for CustomMenuEventAPIRequest"""
+    def __init__(self, request_data):
+        super(CustomMenuEventAPIRequest, self).__init__(request_data)
+
+        self.event_key = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_EVENT_KEY)

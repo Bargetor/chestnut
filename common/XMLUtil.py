@@ -67,8 +67,7 @@ def CDATA(text=None):
 ET._original_serialize_xml = ET._serialize_xml
 def _serialize_xml(write, elem, encoding, qnames, namespaces):
     if elem.tag == '![CDATA[':
-        write("<%s%s]]>" % (
-                elem.tag, elem.text))
+        write("<%s%s]]>" % (elem.tag, elem.text))
         return
     return ET._original_serialize_xml(
         write, elem, encoding, qnames, namespaces)

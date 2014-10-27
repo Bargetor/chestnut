@@ -4,6 +4,9 @@ from api.src.APIRequest import APIRequestData
 from api.src.APIProcesser import APIProcesser
 import api.APISettings as settings
 from common import ClassUtil
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class APICenter(object):
@@ -22,6 +25,7 @@ class APICenter(object):
         if not self._isInit:
             self.__processer_init()
             self._isInit = True
+            log.info('APICenter init done!')
 
     def __processer_init(self):
         self._processer_chain = APIProcesser(None)
@@ -30,6 +34,7 @@ class APICenter(object):
 
     def process_request(self, http_request):
         request_data = APIRequestData(http_request)
+        log.info(request_data)
         response = self._processer_chain.process(request_data)
         if not response:
             response = HttpResponse(None)
