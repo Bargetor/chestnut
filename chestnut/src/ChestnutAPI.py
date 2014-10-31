@@ -1,7 +1,10 @@
+#-*- coding: utf-8 -*-
+
 from api.src.APIParser import BaseAPIParser
 from api.src.APIRequest import BaseAPIRequest
 from api.src.APIResponse import BaseAPIResponse
 from api.src.APIListener import BaseAPIListener
+from api.src.ReplyData import NewsReplyData
 from common.TimeUtil import *
 
 from chestnut.models import *
@@ -120,5 +123,18 @@ class ChestnutWeChatTextMessageAPIListener(BaseAPIListener):
     """docstring for ChestnutWeChatTextMessageAPIListener"""
 
     def listen(self, request):
-        print request.to_user_name
+        pass
 
+
+class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
+    def __init__(self):
+        super(ChestnutWeChatMessageAPIResponse, self).__init__()
+
+    def response(self, request):
+        if not request:
+            return super(MessageAPIResponse, self).response(request)
+
+        response_data = NewsReplyData(request)
+        response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
+        response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
+        return response_data.get_xml_str()
