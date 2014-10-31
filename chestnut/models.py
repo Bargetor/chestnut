@@ -38,3 +38,4 @@ class ChestnutShellPost(models.Model):
     post_type = models.CharField(max_length = 10)
     post_mime_type = models.CharField(max_length = 10)
     comment_count = models.IntegerField(default = 0)
+    post_pic = models.TextField(null = True)

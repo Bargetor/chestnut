@@ -6,6 +6,7 @@ from api.src.APIResponse import BaseAPIResponse
 from api.src.APIListener import BaseAPIListener
 from api.src.ReplyData import NewsReplyData
 from common.TimeUtil import *
+from chestnut.src.ModelDao import *
 
 from chestnut.models import *
 
@@ -26,6 +27,7 @@ class ChestnutAPIRequest(BaseAPIRequest):
 
         self.chestnut_user = None
         self.chestnut_password = None
+        self.chestnut_post_pic = None
 
         self.post_id = None
         self.post_author = None
@@ -88,35 +90,12 @@ class ChestnutAPIResponse(BaseAPIResponse):
         super(ChestnutAPIResponse, self).__init__()
 
     def response(self, request):
-        chestnut_user = None
+
         user_name = request.chestnut_user
-        if user_name is not None:
-            chestnut_user_list = ChestnutUser.objects.filter(user_name = user_name)
-            if len(chestnut_user_list) == 1:
-                chestnut_user = chestnut_user_list[0]
+        chestnut_user = get_chestnut_user(user_name)
+        save_post_for_request(chestnut_user, request)
 
-        if not chestnut_user:
-            chestnut_user = ChestnutUser(user_name = request.chestnut_user)
-            chestnut_user.save()
-
-        if chestnut_user:
-            post = ChestnutShellPost()
-            post.chestnut_user = chestnut_user
-
-            for key in post.__dict__:
-                value = None
-                try:
-                    value = getattr(request, key)
-                except Exception, e:
-                    pass
-                if value is not None:
-                    post.__dict__[key] = value
-
-            print post.__dict__
-
-            post.save()
         return "chestnut_user:%s post_id:%s post_content:%s" % (request.chestnut_user, request.post_id, request.post_content)
-
 
 
 class ChestnutWeChatTextMessageAPIListener(BaseAPIListener):
@@ -135,6 +114,10 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
             return super(MessageAPIResponse, self).response(request)
 
         response_data = NewsReplyData(request)
-        response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
-        response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
+        # response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
+        # response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
+
+        post_list = get_post_list(request.to_user_name, 5)
+        for post in post_list:
+            response_data.set_article_item(post.post_title, '', post.post_pic, post.guid)
         return response_data.get_xml_str()
