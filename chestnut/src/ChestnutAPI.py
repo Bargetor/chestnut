@@ -110,6 +110,8 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         super(ChestnutWeChatMessageAPIResponse, self).__init__()
 
     def response(self, request):
+        print request
+
         if not request:
             return super(MessageAPIResponse, self).response(request)
 

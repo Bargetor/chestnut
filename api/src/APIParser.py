@@ -25,6 +25,7 @@ class MessageRequestParser(BaseAPIParser):
         super(MessageRequestParser, self).__init__()
 
     def parse(self, request_data):
+        print request_data
         if request_data.request_method == "POST":
             if not request_data.request_post_xml_dic:
                 return super(MessageRequestParser, self).parse(request_data)
