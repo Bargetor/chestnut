@@ -121,7 +121,7 @@ LOGGING = {
         'request_handler': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join('logs/','script.log'), #或者直接写路径：'filename':'c:/logs/request.log''
+            'filename': os.path.join('logs/','request.log'), #或者直接写路径：'filename':'c:/logs/request.log''
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'standard',

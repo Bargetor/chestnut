@@ -7,4 +7,5 @@ from api.src.APICenter import APICenter
 # Create your views here.
 @csrf_exempt
 def index(request):
+    print request
     return APICenter().process_request(request)
