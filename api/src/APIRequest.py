@@ -10,28 +10,38 @@ class APIRequestData(object):
 
         self.request_method = http_request.method
         self.request_get_data = http_request.GET
-        # self.request_post_xml_data = http_request.POST.get(POST_DATA_NAME)
-        self.request_post_xml_data = http_request.body
+        self.request_post_data_body = http_request.body
+        self.request_post_data = http_request.POST
         self.request_post_xml_dic = None
 
         self.__parse_xml_data()
 
     def __parse_xml_data(self):
-        etree = XMLUtil.parse_from_str(self.request_post_xml_data)
+        etree = XMLUtil.parse_from_str(self.request_post_data_body)
         self.request_post_xml_dic = XMLUtil.get_children_text_dic(etree, CHARSET)
 
     def __str__(self):
-        return "%s %s %s" % (self.request_method, self.request_get_data, self.request_post_xml_data)
+        return "%s %s %s" % (self.request_method, self.request_get_data, self.request_post_data_body)
 
     def __unicode__(self):
         return self.__str__()
 
 
+class BaseAPIRequest(object):
+    """docstring for BaseAPIRequest"""
+    def __init__(self, request_data):
+        super(BaseAPIRequest, self).__init__()
 
-class SignatureAPIRequest(object):
+        self.__load_request_data(request_data)
+
+    def __load_request_data(self, request_data):
+        pass
+
+
+class SignatureAPIRequest(BaseAPIRequest):
     """docstring for SignatureAPIRequest"""
     def __init__(self, request_data):
-        super(SignatureAPIRequest, self).__init__()
+        super(SignatureAPIRequest, self).__init__(request_data)
 
         self.token = None
         self.signature = None
@@ -39,9 +49,9 @@ class SignatureAPIRequest(object):
         self.nonce = None
         self.echostr = None
 
-        self.__init_request(request_data)
+        self.__load_request_data(request_data)
 
-    def __init_request(self, request_data):
+    def __load_request_data(self, request_data):
         self.signature = request_data.request_get_data.get('signature')
         self.timestamp = request_data.request_get_data.get('timestamp')
         self.nonce = request_data.request_get_data.get('nonce')
@@ -50,15 +60,16 @@ class SignatureAPIRequest(object):
 
 
 
-class BaseAPIRequest(object):
-    """docstring for BaseAPIRequest"""
+class BaseWeChatAPIRequest(BaseAPIRequest):
+    """docstring for BaseWeChatAPIRequest"""
     def __init__(self, request_data):
-        super(BaseAPIRequest, self).__init__()
+        super(BaseWeChatAPIRequest, self).__init__(request_data)
 
         self.to_user_name = None
         self.from_user_name = None
         self.create_time = None
         self.msg_type = None
+
         self.__load_request_data(request_data)
 
     def __load_request_data(self, request_data):
@@ -67,7 +78,7 @@ class BaseAPIRequest(object):
         self.create_time = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_CREATE_TIME)
         self.msg_type = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_MSG_TYPE)
 
-class MessageAPIRequest(BaseAPIRequest):
+class MessageAPIRequest(BaseWeChatAPIRequest):
     """docstring for MessageAPIRequest"""
     def __init__(self, request_data):
         super(MessageAPIRequest, self).__init__(request_data)
@@ -166,7 +177,7 @@ class LinkAPIRequest(MessageAPIRequest):
         self.description = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_DESCRIPTION)
         self.url = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_URL)
 
-class EventAPIRequest(BaseAPIRequest):
+class EventAPIRequest(BaseWeChatAPIRequest):
     """docstring for EventAPIRequest"""
     def __init__(self, request_data):
         super(EventAPIRequest, self).__init__(request_data)

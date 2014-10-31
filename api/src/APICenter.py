@@ -5,9 +5,9 @@ from api.src.APIProcesser import APIProcesser
 import api.APISettings as settings
 from common import ClassUtil
 import logging
+import traceback
 
 log = logging.getLogger(__name__)
-
 
 class APICenter(object):
     """docstring for APICenter"""
@@ -35,7 +35,12 @@ class APICenter(object):
     def process_request(self, http_request):
         request_data = APIRequestData(http_request)
         log.info(request_data)
-        response = self._processer_chain.process(request_data)
+        response = None
+        try:
+            response = self._processer_chain.process(request_data)
+        except Exception, e:
+            exstr = traceback.format_exc()
+            print exstr
         if not response:
             response = HttpResponse(None)
         return response

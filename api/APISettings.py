@@ -82,10 +82,15 @@ request_processer_list = [
                              {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.MessageRequestParser",
                               REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.MessageAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
-                                 "",
+                                 "chestnut.src.ChestnutAPI.ChestnutWeChatTextMessageAPIListener",
                              ]},
                              {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.EventRequestParser",
                               REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.EventAPIResponse",
+                              REQUEST_LISTENER_CONFIG_NAME:[
+                                 "",
+                             ]},
+                             {REQUEST_PARSER_CONFIG_NAME:"chestnut.src.ChestnutAPI.ChestnutAPIParser",
+                              REQUEST_RESPONSER_CONFIG_NAME:"chestnut.src.ChestnutAPI.ChestnutAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "",
                              ]},
