@@ -10,6 +10,10 @@ from chestnut.src.ModelDao import *
 
 from chestnut.models import *
 
+import logging
+
+log = logging.getLogger(__name__)
+
 class ChestnutAPIParser(BaseAPIParser):
     """docstring for ChestnutShellAPIRarser"""
     def __init__(self):
@@ -113,8 +117,6 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         super(ChestnutWeChatMessageAPIResponse, self).__init__()
 
     def response(self, request):
-        print request
-
         if not request:
             return super(MessageAPIResponse, self).response(request)
 
@@ -126,5 +128,5 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         for post in post_list:
             response_data.set_article_item(post.post_title, '', post.post_pic, post.guid)
 
-        print response_data.get_xml_str()
+        log.info(response_data.get_xml_str())
         return response_data.get_xml_str()

@@ -142,6 +142,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'standard',
         },
+        'chestnut_handler': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join('logs/','chestnut.log'), #或者直接写路径：'filename':'c:/logs/script.log'
+            'maxBytes': 1024*1024*5, # 5 MB
+            'backupCount': 5,
+            'formatter':'standard',
+        },
     },
     'loggers': {
         'django': {
@@ -159,8 +167,13 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False
         },
-        'api': { # 脚本专用日志
+        'api': { # api专用日志
             'handlers': ['api_handler'],
+            'level': 'INFO',
+            'propagate': False
+        },
+        'chestnut': { # chestnut专用日志
+            'handlers': ['chestnut_handler'],
             'level': 'INFO',
             'propagate': False
         },
