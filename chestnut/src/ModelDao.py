@@ -8,7 +8,7 @@ def get_chestnut_user(user_name):
         chestnut_user = chestnut_user_list[0]
 
     if not chestnut_user:
-        chestnut_user = ChestnutUser(user_name = request.chestnut_user)
+        chestnut_user = ChestnutUser(user_name = user_name)
         chestnut_user.save()
     return chestnut_user
 
