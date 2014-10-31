@@ -73,7 +73,7 @@ class MessageAPIResponse(BaseAPIResponse):
         if isinstance(request, LocationAPIRequest):
             response_data = NewsReplyData(request)
             response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
-            response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player.png', 'http://www.bargetor.com/works/mini-play.html')
+            response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
             return response_data.get_xml_str()
 
         if isinstance(request, LinkAPIRequest):
