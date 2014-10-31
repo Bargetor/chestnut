@@ -120,4 +120,6 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         post_list = get_post_list(request.to_user_name, 5)
         for post in post_list:
             response_data.set_article_item(post.post_title, '', post.post_pic, post.guid)
+
+        print response_data.get_xml_str()
         return response_data.get_xml_str()
