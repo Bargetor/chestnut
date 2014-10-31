@@ -28,6 +28,7 @@ class ChestnutAPIRequest(BaseAPIRequest):
         self.chestnut_user = None
         self.chestnut_password = None
         self.chestnut_post_pic = None
+        self.chestnut_wechat_id = None
 
         self.post_id = None
         self.post_author = None
@@ -93,6 +94,8 @@ class ChestnutAPIResponse(BaseAPIResponse):
 
         user_name = request.chestnut_user
         chestnut_user = get_chestnut_user(user_name)
+        if not chestnut_user:
+            chestnut_user = create_user_for_request(request)
         save_post_for_request(chestnut_user, request)
 
         return "chestnut_user:%s post_id:%s post_content:%s" % (request.chestnut_user, request.post_id, request.post_content)

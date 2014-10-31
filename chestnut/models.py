@@ -3,6 +3,10 @@ from django.db import models
 class ChestnutUser(models.Model):
     """docstring for ChestnutUser"""
     user_name = models.CharField(max_length = 40, unique = True)
+    user_wechat_id = models.CharField(max_length = 40, unique = True)
+    user_password = models.CharField(max_length = 128)
+    app_id = models.CharField(max_length = 40)
+    app_secret = models.CharField(max_length = 40)
     create_time = models.DateTimeField(auto_now_add = True)
     modify_time = models.DateTimeField(auto_now = True)
     state = models.IntegerField(default = 0)
