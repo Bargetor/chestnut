@@ -11,7 +11,7 @@ def get_chestnut_user(user_name):
 
 def get_chestnut_user_for_wechat_id(user_wechat_id):
     chestnut_user = None
-    if user_name is not None:
+    if user_wechat_id is not None:
         chestnut_user_list = ChestnutUser.objects.filter(user_wechat_id = user_wechat_id)
     if len(chestnut_user_list) == 1:
         chestnut_user = chestnut_user_list[0]

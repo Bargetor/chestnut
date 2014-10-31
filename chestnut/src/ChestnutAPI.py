@@ -122,7 +122,7 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         # response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
         # response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
 
-        post_list = get_post_list(request.to_user_name, 5)
+        post_list = get_post_list_for_wechat_id(request.to_user_name, 5)
         for post in post_list:
             response_data.set_article_item(post.post_title, '', post.post_pic, post.guid)
 
