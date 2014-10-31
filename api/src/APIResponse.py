@@ -50,17 +50,17 @@ class MessageAPIResponse(BaseAPIResponse):
         if isinstance(request, TextAPIRequest):
             response_data = TextReplyData(request)
             response_data.content = "hello, this's great system, it's called chestnut!"
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
         if isinstance(request, PicAPIRequest):
             response_data = ImageReplyData(request)
             response_data.media_id = "media_id12345678"
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
         if isinstance(request, VoiceAPIRequest):
             response_data = VoiceReplyData(request)
             response_data.media_id = "media_id12345678"
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
         if isinstance(request, VideoAPIRequest):
             response_data = VideoReplyData(request)
@@ -68,13 +68,13 @@ class MessageAPIResponse(BaseAPIResponse):
             response_data.thumb_media_id = "thumb_media_id1234"
             response_data.title = "bargetor"
             response_data.description = "bargetor and chestnut"
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
         if isinstance(request, LocationAPIRequest):
             response_data = NewsReplyData(request)
             response_data.set_article_item('article title', 'article description', 'pic url', 'url')
             response_data.set_article_item('article title', 'article description', 'pic url', 'url')
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
         if isinstance(request, LinkAPIRequest):
             response_data = MusicReplyData(request)
@@ -84,7 +84,7 @@ class MessageAPIResponse(BaseAPIResponse):
             response_data.thumb_media_id = "thumb_media_id"
             response_data.title = "music title"
             response_data.description = "music description"
-            return response_data.get_json_str()
+            return response_data.get_xml_str()
 
 class EventAPIResponse(BaseAPIResponse):
     """docstring for EventAPIResponse"""
