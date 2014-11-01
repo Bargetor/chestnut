@@ -5,6 +5,7 @@ class ChestnutUser(models.Model):
     user_name = models.CharField(max_length = 40, unique = True)
     user_wechat_id = models.CharField(max_length = 40, unique = True)
     user_password = models.CharField(max_length = 128)
+    user_wechat_token = models.CharField(max_length = 32, null = True)
     app_id = models.CharField(max_length = 40)
     app_secret = models.CharField(max_length = 40)
     create_time = models.DateTimeField(auto_now_add = True)

@@ -33,6 +33,7 @@ class ChestnutAPIRequest(BaseAPIRequest):
         self.chestnut_password = None
         self.chestnut_post_pic = None
         self.chestnut_wechat_id = None
+        self.chestnut_wechat_token = None
 
         self.post_id = None
         self.post_author = None

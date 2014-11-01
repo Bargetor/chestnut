@@ -49,6 +49,7 @@ def create_user_for_request(request):
     chestnut_user = None
     user_name = request.chestnut_user
     user_wechat_id = request.chestnut_wechat_id
+    user_wechat_token = request.chestnut_wechat_token
     user_password = request.chestnut_password
     if not chestnut_user:
         chestnut_user = ChestnutUser(user_name = user_name, user_wechat_id = user_wechat_id, user_password = user_password)
