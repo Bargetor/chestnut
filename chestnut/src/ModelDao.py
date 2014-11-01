@@ -41,9 +41,9 @@ def get_post_list_for_user(chestnut_user, count = -1):
     if not chestnut_user:
         return
     if count > 0 :
-        return chestnut_user.chestnutshellpost_set.order_by('post_modified')
+        return chestnut_user.chestnutshellpost_set.order_by('-post_modified')
     else:
-        return chestnut_user.chestnutshellpost_set.order_by('post_modified')[0 : count]
+        return chestnut_user.chestnutshellpost_set.order_by('-post_modified')[0 : count]
 
 def create_user_for_request(request):
     chestnut_user = None
