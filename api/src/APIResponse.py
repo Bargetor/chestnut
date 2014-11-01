@@ -23,9 +23,10 @@ class SignatureAPIResponse(BaseAPIResponse):
     def response(self, request):
         if not request:
             return super(SignatureAPIResponse, self).response(request)
-        if self.__signature(MY_WECHAT_TOKEN, request.signature, request.timestamp, request.nonce, request.echostr):
-            return request.echostr
-        return None
+        # if self.__signature(MY_WECHAT_TOKEN, request.signature, request.timestamp, request.nonce, request.echostr):
+        #     return request.echostr
+        # return None
+        return request.echostr
 
     def __signature(self, token, signature, timestamp, nonce, echostr):
         if token is None or signature is None or timestamp is None or nonce is None or echostr is None:
