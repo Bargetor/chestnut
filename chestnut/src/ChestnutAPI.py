@@ -6,6 +6,7 @@ from api.src.APIResponse import BaseAPIResponse
 from api.src.APIListener import BaseAPIListener
 from api.src.ReplyData import NewsReplyData
 from common.TimeUtil import *
+from common.UserUtil import *
 from chestnut.src.ModelDao import *
 
 from chestnut.models import *
@@ -149,5 +150,11 @@ class ChestnutSignupAPIResponse(BaseAPIResponse):
     def response(self, request):
         if not request:
             return None
-        create_user_for_request(request)
+        create_chestnut_user_for_request(request)
+
+        django_user = get_django_user_by_username(request.chestnut_user)
+        if not django_user:
+            create_normal_django_user(request.chestnut_user, request.chestnut_password)
+        else:
+            reset_django_user_password(django_user, request.chestnut_password)
 

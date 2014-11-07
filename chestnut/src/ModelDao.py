@@ -45,7 +45,7 @@ def get_post_list_for_user(chestnut_user, count = -1):
     else:
         return chestnut_user.chestnutshellpost_set.order_by('-post_modified')[0 : count]
 
-def create_user_for_request(request):
+def create_chestnut_user_for_request(request):
     user_name = request.chestnut_user
     user_wechat_id = request.chestnut_wechat_id
     user_wechat_token = request.chestnut_wechat_token
