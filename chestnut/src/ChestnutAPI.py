@@ -31,7 +31,6 @@ class ChestnutAPIRequest(BaseAPIRequest):
 
         self.chestnut_user = None
         self.chestnut_password = None
-        self.chestnut_post_pic = None
         self.chestnut_wechat_id = None
         self.chestnut_wechat_token = None
 
@@ -40,6 +39,7 @@ class ChestnutAPIRequest(BaseAPIRequest):
         self.post_date = None
         self.post_date_gmt = None
         self.post_content = None
+        self.post_pic = None
         self.post_title = None
         self.post_excerpt = None
         self.post_status = None
@@ -85,7 +85,7 @@ class ChestnutAPIRequest(BaseAPIRequest):
 
 
     def __str__(self):
-        return "post_id:%s post_content:%s" % (self.post_id, self.post_content)
+        return "post_id:%s post_content:%s post_pic:%s" % (self.post_id, self.post_content, self.post_pic)
 
     def __unicode__(self):
         return self.__str__()
@@ -100,7 +100,7 @@ class ChestnutAPIResponse(BaseAPIResponse):
         user_name = request.chestnut_user
         chestnut_user = get_chestnut_user(user_name)
         if not chestnut_user:
-            chestnut_user = create_user_for_request(request)
+            return
         save_post_for_request(chestnut_user, request)
 
         return "chestnut_user:%s post_id:%s post_content:%s" % (request.chestnut_user, request.post_id, request.post_content)
@@ -131,3 +131,23 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
 
         log.info(response_data.get_xml_str())
         return response_data.get_xml_str()
+
+class ChestnutSignupAPIParser(BaseAPIParser):
+    def __init__(self):
+        super(ChestnutSignupAPIParser, self).__init__()
+
+    def parse(self, request_data):
+        if request_data.request_method == "POST" and request_data.request_get_data.get('method') == 'signup':
+            return ChestnutAPIRequest(request_data)
+        return super(ChestnutSignupAPIParser, self).parse(request_data)
+
+class ChestnutSignupAPIResponse(BaseAPIResponse):
+    """docstring for ChestnutSignupAPIResponse"""
+    def __init__(self):
+        super(ChestnutSignupAPIResponse, self).__init__()
+
+    def response(self, request):
+        if not request:
+            return None
+        create_user_for_request(request)
+

@@ -46,14 +46,19 @@ def get_post_list_for_user(chestnut_user, count = -1):
         return chestnut_user.chestnutshellpost_set.order_by('-post_modified')[0 : count]
 
 def create_user_for_request(request):
-    chestnut_user = None
     user_name = request.chestnut_user
     user_wechat_id = request.chestnut_wechat_id
     user_wechat_token = request.chestnut_wechat_token
     user_password = request.chestnut_password
+    chestnut_user = get_chestnut_user(user_name)
     if not chestnut_user:
-        chestnut_user = ChestnutUser(user_name = user_name, user_wechat_id = user_wechat_id, user_password = user_password)
-        chestnut_user.save()
+        chestnut_user = ChestnutUser()
+    chestnut_user.user_name = user_name
+    chestnut_user.user_password = user_password
+    chestnut_user.user_wechat_id = user_wechat_id
+    chestnut_user.user_wechat_token = user_wechat_token
+
+    chestnut_user.save()
     return chestnut_user
 
 def save_post_for_request(chestnut_user, request):
@@ -73,6 +78,6 @@ def save_post_for_request(chestnut_user, request):
         if value is not None:
             post.__dict__[key] = value
 
-    post.post_pic = request.chestnut_post_pic
+    print request
 
     post.save()

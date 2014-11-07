@@ -94,6 +94,11 @@ request_processer_list = [
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "",
                              ]},
+                             {REQUEST_PARSER_CONFIG_NAME:"chestnut.src.ChestnutAPI.ChestnutSignupAPIParser",
+                              REQUEST_RESPONSER_CONFIG_NAME:"chestnut.src.ChestnutAPI.ChestnutSignupAPIResponse",
+                              REQUEST_LISTENER_CONFIG_NAME:[
+                                 "",
+                             ]},
                           ]
 
 

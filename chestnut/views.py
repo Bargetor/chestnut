@@ -22,3 +22,9 @@ def login(request):
         return HttpResponse('success!')
     else:
         return HttpResponse('faild!')
+
+def logout(request):
+    return HttpResponse('')
+
+def signup(request):
+    return HttpResponse('')
