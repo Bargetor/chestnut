@@ -169,9 +169,9 @@ def md5(string):
     return md5_str
 
 
-wechat = Wechat()
-wechat.username = 'bargetor_public@sina.com'
-wechat.password = 'lanqiao@mj'
+# wechat = Wechat()
+# wechat.username = 'bargetor_public@sina.com'
+# wechat.password = 'lanqiao@mj'
 
-token = wechat.wechat_auto_login()
-wechat.request_user_setting_page()
+# token = wechat.wechat_auto_login()
+# wechat.request_user_setting_page()
