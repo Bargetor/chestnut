@@ -10,10 +10,10 @@ from common.HTMLUtil import *
 
 class Wechat(object):
     """docstring for Wechat"""
-    def __init__(self):
+    def __init__(self, username = None, password = None):
         super(Wechat, self).__init__()
-        self.username = None
-        self.password = None
+        self.username = username
+        self.password = password
         self.request_token = None
 
         self.setting_page = None
@@ -22,7 +22,9 @@ class Wechat(object):
 
         if not self.username or not self.password: return
 
-        pwd = md5(self.password)
+        # 网页请求为了安全，以MD5加密密码
+        # pwd = md5(self.password)
+        pwd = self.password
 
         cj = cookielib.LWPCookieJar()
         opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))

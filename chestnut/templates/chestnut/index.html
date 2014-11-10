@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html>
-    <head></head>
+    <head>
+        <script type="text/javascript" src="{{STATIC_URL}}js/jquery-1.11.1.min.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}js/django-request-pre.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}js/encrypt.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}js/chestnut-request.js"></script>
+    </head>
     <body>
         {{ response_str }}
         <form method="post" action="{% url 'login'%}">
@@ -9,6 +14,7 @@
             <input name="password" type="password" placeholder="password"/>
             <input type="submit" value="登录"/>
         </form>
+        <input type="button" value="获取微信公众号信息" onclick="get_wechat_user_info('bargetor_public@sina.com', 'lanqiao@mj');">
 
     </body>
 

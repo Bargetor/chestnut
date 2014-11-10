@@ -1,5 +1,8 @@
 from django.conf.urls import include, url, patterns
 from django.contrib import admin
+from django.conf import settings
+
+from chestnut.support.wechat import views
 
 urlpatterns = [
     # Examples:
@@ -11,4 +14,9 @@ urlpatterns = [
     url(r'^api/', include('api.urls', namespace= 'api')),
     url(r'^api$', include('api.urls', namespace= 'api')),
     url(r'^admin/', include(admin.site.urls)),
+
+
+    #support
+    url(r'^chestnut/support/', include('chestnut.support.urls', namespace= 'chestnut.support'))
+    # url(r'^chestnut/support/wechat/user_info/$', views.user_info)
 ]
