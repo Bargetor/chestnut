@@ -7,6 +7,7 @@ import hashlib
 import xml.etree.ElementTree as ET
 
 from common.HTMLUtil import *
+from common.JsonUtil import JsonObject
 
 class Wechat(object):
     """docstring for Wechat"""
@@ -162,6 +163,9 @@ class WechatSettingPage(object):
 
         def __unicode__(self):
             return self.__str__()
+
+        def get_json_str(self):
+            return JsonObject(self.__dict__).get_json_str()
 
 
 def md5(string):

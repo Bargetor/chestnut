@@ -3,7 +3,7 @@
 import time
 from common.XMLUtil import *
 from api.APISettings import *
-from common.JsonUtil import ChestnutJson
+from common.JsonUtil import JsonObject
 
 class BaseReplyData(object):
     """docstring for BaseReplyData"""
@@ -41,7 +41,7 @@ class BaseReplyData(object):
         return to_etree_xml_str(etree)
 
     def build_json_object(self):
-        json = ChestnutJson()
+        json = JsonObject()
         json.append(REPLY_DATA_JSON_TAG_NAME_TO_USER_NAME, self.to_user_name)
         json.append(REPLY_DATA_JSON_TAG_NAME_MSG_TYPE, self.msg_type)
         return json
@@ -64,7 +64,7 @@ class TextReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(TextReplyData, self).build_json_object()
-        text_json = ChestnutJson()
+        text_json = JsonObject()
         text_json.append(REPLY_DATA_JSON_TAG_NAME_CONTENT, self.content)
         json.append_chestnut_json(REPLY_DATA_JSON_TAG_NAME_TEXT, text_json)
         return json
@@ -85,7 +85,7 @@ class ImageReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(ImageReplyData, self).build_json_object()
-        image_json = ChestnutJson()
+        image_json = JsonObject()
         image_json.append(REPLY_DATA_JSON_TAG_NAME_MEDIA_ID, self.media_id)
         json.append_chestnut_json(REPLY_DATA_JSON_TAG_NAME_IMAGE, image_json)
         return json
@@ -107,7 +107,7 @@ class VoiceReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(VoiceReplyData, self).build_json_object()
-        voice_json = ChestnutJson()
+        voice_json = JsonObject()
         voice_json.append(REPLY_DATA_JSON_TAG_NAME_MEDIA_ID, self.media_id)
         json.append_chestnut_json(REPLY_DATA_JSON_TAG_NAME_VOICE, voice_json)
         return json
@@ -133,7 +133,7 @@ class VideoReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(VideoReplyData, self).build_json_object()
-        video_json = ChestnutJson()
+        video_json = JsonObject()
         video_json.append(REPLY_DATA_JSON_TAG_NAME_MEDIA_ID, self.media_id)
         video_json.append(REPLY_DATA_JSON_TAG_NAME_THUMB_MEIDA_ID, self.thumb_media_id)
         video_json.append(REPLY_DATA_JSON_TAG_NAME_TITLE, self.title)
@@ -167,7 +167,7 @@ class MusicReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(MusicReplyData, self).build_json_object()
-        music_json = ChestnutJson()
+        music_json = JsonObject()
         music_json.append(REPLY_DATA_JSON_TAG_NAME_MEDIA_ID, self.media_id)
         music_json.append(REPLY_DATA_JSON_TAG_NAME_THUMB_MEIDA_ID, self.thumb_media_id)
         music_json.append(REPLY_DATA_JSON_TAG_NAME_TITLE, self.title)
@@ -197,7 +197,7 @@ class NewsReplyData(BaseReplyData):
 
     def build_json_object(self):
         json = super(NewsReplyData, self).build_json_object()
-        news_json = ChestnutJson()
+        news_json = JsonObject()
         news_json.append(REPLY_DATA_JSON_TAG_NAME_ARTICLES, self.__build_articles_json_list())
         json.append_chestnut_json(REPLY_DATA_JSON_TAG_NAME_NEWS, news_json)
         return json

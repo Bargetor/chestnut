@@ -1,7 +1,6 @@
 import json
 
-
-class ChestnutJson(object):
+class JsonObject(object):
     """docstring for ChestnutJson"""
     def __init__(self, dic = None):
         super(ChestnutJson, self).__init__()

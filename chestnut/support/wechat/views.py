@@ -1,14 +1,17 @@
 from django.http import HttpResponse
-from chestnut.src.Wechat import Wechat
+from chestnut.src.wechat.WechatCenter import WechatCenter
 
 
 def user_info(request):
-    username = request.GET.get('username')
-    password = request.GET.get('password')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
 
-    wechat = Wechat(username, password)
-    wechat.wechat_auto_login()
-    wechat.request_user_setting_page()
+    print request
+
+    wechat = WechatCenter().build_wechat(username, password)
+
+    response_json = None
+    if wechat is not None : response_json =  wechat.setting_page.account_info.name
 
 
-    return HttpResponse(wechat.setting_page.account_info.name)
+    return HttpResponse(response_json)
