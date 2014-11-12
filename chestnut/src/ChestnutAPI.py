@@ -7,7 +7,7 @@ from api.src.APIListener import BaseAPIListener
 from api.src.ReplyData import NewsReplyData
 from common.TimeUtil import *
 from common.UserUtil import *
-from chestnut.src.ModelDao import *
+from chestnut.src import ChestnutModelDao
 
 from chestnut.models import *
 
@@ -99,10 +99,10 @@ class ChestnutAPIResponse(BaseAPIResponse):
     def response(self, request):
 
         user_name = request.chestnut_user
-        chestnut_user = get_chestnut_user(user_name)
+        chestnut_user = ChestnutModelDao.get_chestnut_user(user_name)
         if not chestnut_user:
             return
-        save_post_for_request(chestnut_user, request)
+        ChestnutModelDao.save_post_for_request(chestnut_user, request)
 
         return "chestnut_user:%s post_id:%s post_content:%s" % (request.chestnut_user, request.post_id, request.post_content)
 
