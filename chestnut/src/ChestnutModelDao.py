@@ -9,10 +9,10 @@ def get_chestnut_user(user_name):
 
     return chestnut_user
 
-def get_chestnut_user_for_wechat_id(user_wechat_id):
+def get_chestnut_user_for_wechat_default_id(user_wechat_default_id):
     chestnut_user = None
-    if user_wechat_id is not None:
-        chestnut_user_list = ChestnutUser.objects.filter(user_wechat_id = user_wechat_id)
+    if user_wechat_default_id is not None:
+        chestnut_user_list = ChestnutUser.objects.filter(user_wechat_default_id = user_wechat_default_id)
     if len(chestnut_user_list) == 1:
         chestnut_user = chestnut_user_list[0]
 
@@ -28,8 +28,8 @@ def get_post(chestnut_user, post_id):
         post = post_list[0]
     return post
 
-def get_post_list_for_wechat_id(user_wechat_id, count = -1):
-    chestnut_user = get_chestnut_user_for_wechat_id(user_wechat_id)
+def get_post_list_for_wechat_default_id(user_wechat_default_id, count = -1):
+    chestnut_user = get_chestnut_user_for_wechat_default_id(user_wechat_default_id)
     return get_post_list_for_user(chestnut_user, count)
 
 
@@ -47,15 +47,20 @@ def get_post_list_for_user(chestnut_user, count = -1):
 
 def create_chestnut_user_for_request(request):
     user_name = request.chestnut_user
-    user_wechat_id = request.chestnut_wechat_id
+    user_wechat_default_id = request.chestnut_wechat_id
     user_wechat_token = request.chestnut_wechat_token
     user_password = request.chestnut_password
+    chestnut_user = get_chestnut_user(user_name)
+    return create_chestnut_user(user_name, user_password, user_wechat_default_id, user_wechat_token)
+
+def create_chestnut_user(user_name, user_password, user_wechat_default_id, user_wechat_token):
+    if not user_name or not user_password or not user_wechat_default_id : return
     chestnut_user = get_chestnut_user(user_name)
     if not chestnut_user:
         chestnut_user = ChestnutUser()
     chestnut_user.user_name = user_name
     chestnut_user.user_password = user_password
-    chestnut_user.user_wechat_id = user_wechat_id
+    chestnut_user.user_wechat_default_id = user_wechat_default_id
     chestnut_user.user_wechat_token = user_wechat_token
 
     chestnut_user.save()

@@ -3,10 +3,12 @@ import json
 class JsonObject(object):
     """docstring for ChestnutJson"""
     def __init__(self, dic = None):
-        super(ChestnutJson, self).__init__()
+        super(JsonObject, self).__init__()
         self.__init_chestnut_json()
         if dic is not None:
             self.data = dic.copy()
+
+
 
     def __init_chestnut_json(self):
         self.data = {}

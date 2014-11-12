@@ -26,7 +26,6 @@ class WechatCenter(object):
         wechat = Wechat(username, password)
         self.__refresh_wechat(wechat)
         self._wechat_set[username] = wechat
-        print wechat.setting_page.account_info.name
         return wechat
 
     def __refresh_wechat(self, wechat):

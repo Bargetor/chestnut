@@ -6,7 +6,7 @@ from api.src.APIResponse import BaseAPIResponse
 from api.src.APIListener import BaseAPIListener
 from api.src.ReplyData import NewsReplyData
 from common.TimeUtil import *
-from common.UserUtil import *
+from common import UserUtil
 from chestnut.src import ChestnutModelDao
 
 from chestnut.models import *
@@ -126,7 +126,7 @@ class ChestnutWeChatMessageAPIResponse(BaseAPIResponse):
         # response_data.set_article_item('BesideBamboo and Bargetor', 'Hybrid Species', 'http://www.bargetor.com/wp-content/themes/bargetor/images/img-home-banner.jpg', 'http://www.bargetor.com')
         # response_data.set_article_item('mini-player', 'mini-player', 'http://www.bargetor.com/wp-content/uploads/2014/06/mini-player-150x150.png', 'http://www.bargetor.com/works/mini-play.html')
 
-        post_list = get_post_list_for_wechat_id(request.to_user_name, 5)
+        post_list = ChestnutModelDao.get_post_list_for_wechat_default_id(request.to_user_name, 5)
         for post in post_list:
             response_data.set_article_item(post.post_title, '', post.post_pic, post.guid)
 
@@ -150,11 +150,11 @@ class ChestnutSignupAPIResponse(BaseAPIResponse):
     def response(self, request):
         if not request:
             return None
-        create_chestnut_user_for_request(request)
+        ChestnutModelDao.create_chestnut_user_for_request(request)
 
-        django_user = get_django_user_by_username(request.chestnut_user)
+        django_user = UserUtil.get_django_user_by_username(request.chestnut_user)
         if not django_user:
-            create_normal_django_user(request.chestnut_user, request.chestnut_password)
+            UserUtil.create_normal_django_user(request.chestnut_user, request.chestnut_password)
         else:
-            reset_django_user_password(django_user, request.chestnut_password)
+            UserUtil.reset_django_user_password(django_user, request.chestnut_password)
 

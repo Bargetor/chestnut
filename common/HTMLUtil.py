@@ -1,4 +1,5 @@
 import html5lib
+import traceback
 
 def build_html_dom_from_str(html_str):
     return html5lib.parse(html_str, 'dom')
@@ -14,11 +15,34 @@ def find_html_element_list_for_tag(element, tag, class_style = None):
     return result
 
 def find_element_content(element):
-    content = None
-    for content_element_text_child in element.childNodes:
-        content = content_element_text_child.nodeValue
-        if not content: continue
-        content = content.strip()
-        if not content or content == '':
-            content = None
-    return content
+    try:
+        content = None
+
+        for content_element_text_child in element.childNodes:
+            content = content_element_text_child.nodeValue
+
+            if content is not None:
+                content = content.strip()
+
+            if content is not None and content != '' : return content
+
+            if not hasattr(content_element_text_child, 'childNodes') : continue
+
+            if (content is None or content == '') and (content_element_text_child.childNodes is None or len(content_element_text_child.childNodes) == 0):
+                continue
+
+            content = find_element_content(content_element_text_child)
+
+            if content is not None and content != '' : return content
+
+        return content
+    except Exception, e:
+        exstr = traceback.format_exc()
+        print exstr
+
+
+
+
+
+
+

@@ -6,8 +6,13 @@ import json
 import hashlib
 import xml.etree.ElementTree as ET
 
-from common.HTMLUtil import *
+from common import HTMLUtil
 from common.JsonUtil import JsonObject
+
+import logging
+import traceback
+
+log = logging.getLogger(__name__)
 
 class Wechat(object):
     """docstring for Wechat"""
@@ -66,14 +71,14 @@ class WechatSettingPage(object):
         self.request_token = request_token
 
         setting_page_html = self.__request_user_setting_page()
-        self.dom = build_html_dom_from_str(setting_page_html)
+        self.dom = HTMLUtil.build_html_dom_from_str(setting_page_html)
 
         self.account_info = self.AccountInfo()
         self.__init_account_info()
 
     def __init_account_info(self):
         self.__parse_account_info()
-        print self.account_info
+        log.info(self.account_info)
 
 
     def __request_user_setting_page(self):
@@ -97,19 +102,19 @@ class WechatSettingPage(object):
 
     def __parse_account_info(self):
         if not self.dom: return
-        account_info_element_list = find_html_element_list_for_tag(self.dom, 'li', 'account_setting_item')
+        account_info_element_list = HTMLUtil.find_html_element_list_for_tag(self.dom, 'li', 'account_setting_item')
         for element in account_info_element_list:
             account_info_item = self.__parse_account_info_item(element)
             self.__confirm_account_info(account_info_item)
 
     def __parse_account_info_item(self, element):
         item = {}
-        name_element = find_html_element_list_for_tag(element, 'h4')[0]
+        name_element = HTMLUtil.find_html_element_list_for_tag(element, 'h4')[0]
         if not name_element: return item
-        name = find_element_content(name_element)
-        content_element = find_html_element_list_for_tag(element, 'div', 'meta_content')[0]
+        name = HTMLUtil.find_element_content(name_element)
+        content_element = HTMLUtil.find_html_element_list_for_tag(element, 'div', 'meta_content')[0]
         if not content_element: return item
-        content = find_element_content(content_element)
+        content = HTMLUtil.find_element_content(content_element)
         item['name'] = name
         item['content'] = content
         return item
@@ -165,7 +170,12 @@ class WechatSettingPage(object):
             return self.__str__()
 
         def get_json_str(self):
-            return JsonObject(self.__dict__).get_json_str()
+            try:
+                return JsonObject(self.__dict__).get_json_str()
+            except Exception, e:
+                exstr = traceback.format_exc()
+                log.error(exstr)
+
 
 
 def md5(string):

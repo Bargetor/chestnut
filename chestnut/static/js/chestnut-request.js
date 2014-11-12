@@ -3,7 +3,8 @@ function get_wechat_user_info(username, password){
 }
 
 function get_wechat_user_info_callback(data){
-    alert(data)
+    data_json = eval('(' + data + ')');
+    document.getElementById("wechat_defualt_id").value = data_json.wechat_defualt_id;
 }
 
 
