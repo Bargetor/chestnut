@@ -1,5 +1,7 @@
 from django.db import models
 
+from common import EncryptionUtil
+
 class ChestnutUser(models.Model):
     """docstring for ChestnutUser"""
     user_name = models.CharField(max_length = 40, unique = True)
@@ -15,6 +17,9 @@ class ChestnutUser(models.Model):
     user_email = models.TextField(null = True)
     display_name = models.TextField(null = True)
     user_mobile_number = models.TextField(null = True)
+
+    def set_password(self, password):
+        self.user_password = EncryptionUtil.sha(password)
 
 
 class ChestnutShellPost(models.Model):

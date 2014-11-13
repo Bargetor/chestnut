@@ -7,6 +7,8 @@ from common.XMLUtil import *
 from api.APISettings import *
 from api.src.ReplyData import *
 
+from common import EncryptionUtil
+
 class BaseAPIResponse(object):
     """docstring for BaseAPIResponse"""
     def __init__(self):
@@ -34,9 +36,7 @@ class SignatureAPIResponse(BaseAPIResponse):
         array = [token, timestamp, nonce]
         array.sort()
         splice_str =  ArrayUtil.str_array_splice(array)
-        sha1= hashlib.sha1()
-        sha1.update(splice_str)
-        sha1_str = sha1.hexdigest()
+        sha1_str = EncryptionUtil.sha(splice_str)
         return sha1_str == signature
 
 class MessageAPIResponse(BaseAPIResponse):

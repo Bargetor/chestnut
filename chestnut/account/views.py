@@ -2,8 +2,7 @@ from api.src import APIRequest
 from django.http import HttpResponse
 from django.contrib import auth
 
-from common import UserUtil
-from chestnut.src import ChestnutModelDao
+from chestnut.src.account import Account
 
 def login(request):
     username = request.POST.get('username', '')
@@ -27,9 +26,5 @@ def signup(request):
     wechat_password = request.POST.get('wechat_password')
     wechat_defualt_id = request.POST.get('wechat_defualt_id')
 
-    ChestnutModelDao.create_chestnut_user(wechat_username, wechat_password, wechat_defualt_id, None)
-
-    django_user = UserUtil.get_django_user_by_username(wechat_username)
-    if not django_user:
-        UserUtil.create_normal_django_user(wechat_username, wechat_defualt_id)
+    Account.signup(wechat_username, wechat_password, wechat_defualt_id)
     return HttpResponse('')

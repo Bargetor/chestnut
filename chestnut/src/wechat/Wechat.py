@@ -178,12 +178,6 @@ class WechatSettingPage(object):
 
 
 
-def md5(string):
-    md5 = hashlib.md5()
-    md5.update(string)
-    md5_str = md5.hexdigest()
-    return md5_str
-
 
 # wechat = Wechat()
 # wechat.username = 'bargetor_public@sina.com'

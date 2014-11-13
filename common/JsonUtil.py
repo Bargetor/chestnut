@@ -25,6 +25,9 @@ class JsonObject(object):
     def __str__(self):
         return self.get_json_str()
 
+    def __unicode__(self):
+        return self.__str__
+
 
 
 # chestnut_json = ChestnutJson()
