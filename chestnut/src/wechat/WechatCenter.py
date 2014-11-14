@@ -1,5 +1,9 @@
 from chestnut.src.wechat.Wechat import Wechat
 
+import logging
+
+log = logging.getLogger(__name__)
+
 class WechatCenter(object):
     """docstring for WechatCenter"""
     _instance = None
@@ -16,12 +20,24 @@ class WechatCenter(object):
 
     def get_wechat(self, username):
         if not username: return None
+
+        log_info = "get_wechat %s" % (username)
+        log.info(log_info)
+
         return self._wechat_set.get(username)
 
     def build_wechat(self, username, password):
         if not username or not password : return None
         wechat = self.get_wechat(username)
-        if wechat is not None : return wechat
+
+        if wechat is not None and wechat.is_login(): return wechat
+        if wechat is not None and not wechat.is_login():
+            wechat.password = password
+            self.__refresh_wechat(wechat)
+            return wechat
+
+        log_info = "build_wechat %s" % (username)
+        log.info(log_info)
 
         wechat = Wechat(username, password)
         self.__refresh_wechat(wechat)

@@ -21,6 +21,7 @@ class Wechat(object):
         self.username = username
         self.password = password
         self.request_token = None
+        self.login_ret = 99999999
 
         self.setting_page = None
 
@@ -54,6 +55,9 @@ class Wechat(object):
         response = ret.read()
         ret.close()
         response_json = json.loads(response)
+        ret = response_json['base_resp']['ret']
+        self.login_ret = ret
+        if not self.is_login() : return
 
         token = response_json['redirect_url'][44:]
 
@@ -63,6 +67,9 @@ class Wechat(object):
     def request_user_setting_page(self):
         self.setting_page = WechatSettingPage(self.request_token)
         return self.setting_page
+
+    def is_login(self):
+        return self.login_ret == 0
 
 class WechatSettingPage(object):
     """docstring for WechatSettingPage"""
@@ -132,7 +139,7 @@ class WechatSettingPage(object):
         if name == '登录邮箱':
             self.account_info.account_name = content
         if name == '原始ID':
-            self.account_info.wechat_defualt_id = content
+            self.account_info.wechat_default_id = content
         if name == '微信号':
             self.account_info.wechat_id = content
         if name == '类型':
@@ -154,7 +161,7 @@ class WechatSettingPage(object):
             self.name = None
             self.pic = None
             self.account_name = None
-            self.wechat_defualt_id = None
+            self.wechat_default_id = None
             self.wechat_id = None
             self.wechat_type = None
             self.description = None
@@ -164,7 +171,7 @@ class WechatSettingPage(object):
             self.qs_code = None
 
         def __str__(self):
-            return 'name:%s pic:%s account_name:%s wechat_defualt_id:%s wechat_id:%s wechat_type:%s description:%s owner_info:%s is_authenticate:%s address:%s  qs_code:%s' % (self.name, self.pic, self.account_name, self.wechat_defualt_id, self.wechat_id, self.wechat_type, self.description, self.owner_info, self.is_authenticate, self.address, self.qs_code)
+            return 'name:%s pic:%s account_name:%s wechat_default_id:%s wechat_id:%s wechat_type:%s description:%s owner_info:%s is_authenticate:%s address:%s  qs_code:%s' % (self.name, self.pic, self.account_name, self.wechat_default_id, self.wechat_id, self.wechat_type, self.description, self.owner_info, self.is_authenticate, self.address, self.qs_code)
 
         def __unicode__(self):
             return self.__str__()

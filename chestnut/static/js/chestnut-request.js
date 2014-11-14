@@ -1,10 +1,10 @@
-function get_wechat_user_info(username, password){
+function get_wechat_user_info(username, password, callback){
     query_post('/chestnut/support/wechat/user_info/', {'username' : username, 'password' : hex_md5(password)}, get_wechat_user_info_callback);
 }
 
 function get_wechat_user_info_callback(data){
     data_json = eval('(' + data + ')');
-    document.getElementById("wechat_defualt_id").value = data_json.wechat_defualt_id;
+    document.getElementById("wechat_default_id").value = data_json.wechat_default_id;
 }
 
 

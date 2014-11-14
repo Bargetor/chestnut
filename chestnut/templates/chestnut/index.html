@@ -1,11 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="chestnut">
     <head>
         <script type="text/javascript" src="{{STATIC_URL}}js/jquery-1.11.1.min.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}js/angular.min.js"></script>
+        <script type="text/javascript" src="{{STATIC_URL}}js/angular-pre.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}js/django-request-pre.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}js/encrypt.js"></script>
         <script type="text/javascript" src="{{STATIC_URL}}js/chestnut-request.js"></script>
+        <script type="text/javascript">
+            var ng_app_chestunt_name = "chestnut";
+
+            var chestnut_app = angular_app_init(ng_app_chestunt_name);
+
+
+            chestnut_app.controller('WechatInfoController', ['$scope', '$http', function($scope, $http){
+
+                $scope.get_wechat_user_info_by_angular = function(username, password){
+                    // get_wechat_user_info('bargetor_public@sina.com', 'lanqiao@mj', $scope.get_wechat_user_info_by_angular_callback);
+
+                    var request = $http.post('/chestnut/support/wechat/user_info/', {'username' : username, 'password' : hex_md5(password)});
+
+                    request.success(function(response, status, headers, config){
+                        $scope.wechat_info = response;
+                    });
+                };
+            }]);
+        </script>
+
     </head>
     <body>
         {{ response_str }}
@@ -15,15 +36,49 @@
             <input name="password" type="password" placeholder="password"/>
             <input type="submit" value="登录"/>
         </form>
-        <input type="button" value="获取微信公众号信息" onclick="get_wechat_user_info('bargetor_public@sina.com', 'lanqiao@mj');">
+        <input type="button" value="获取微信公众号信息" onclick="get_wechat_user_info('bargetor_public@sina.com', 'lanqiao@mj', get_wechat_user_info_callback);">
 
         <form method="post" action="{% url 'account:signup'%}">
             {% csrf_token %}
+            <[your_name]>
             <input name="wechat_username" type="text" value="bargetor_public@sina.com" placeholder="请输入微信公众帐号"/>
             <input name="wechat_password" type="password" value="lanqiao@mj" placeholder="请输入微信公众帐号密码"/>
-            <input name="wechat_defualt_id" type="text" id="wechat_defualt_id"/>
+            <input name="wechat_default_id" type="text" id="wechat_default_id"/>
+            <input type="text" ng-model="your_name"/>
             <input type="submit" value="注册"/>
         </form>
+
+        <div ng-controller="WechatInfoController">
+
+            <table >
+                <tr>
+                    <td>头像</td>
+                    <td><[wechat_info.pic]></td>
+                </tr>
+                <tr>
+                    <td>名称</td>
+                    <td><[wechat_info.name]></td>
+                </tr>
+                <tr>
+                    <td>登录邮箱</td>
+                    <td><[wechat_info.account_name]></td>
+                </tr>
+                <tr>
+                    <td>原始ID</td>
+                    <td><[wechat_info.wechat_default_id]></td>
+                </tr>
+                <tr>
+                    <td>微信号</td>
+                    <td><[wechat_info.wechat_id]></td>
+                </tr>
+                <tr>
+                    <td>主体信息</td>
+                    <td><[wechat_info.owner_info]></td>
+                </tr>
+            </table>
+            <input type="button" value="ng-获取微信公众帐号信息" ng-click="get_wechat_user_info_by_angular('bargetor_public@sina.com', 'lanqiao@mj')"/>
+
+        </div>
 
     </body>
 

@@ -24,7 +24,7 @@ def logout(request):
 def signup(request):
     wechat_username = request.POST.get('wechat_username')
     wechat_password = request.POST.get('wechat_password')
-    wechat_defualt_id = request.POST.get('wechat_defualt_id')
+    wechat_default_id = request.POST.get('wechat_default_id')
 
-    Account.signup(wechat_username, wechat_password, wechat_defualt_id)
+    Account.signup(wechat_username, wechat_password, wechat_default_id)
     return HttpResponse('')
