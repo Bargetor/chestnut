@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from chestnut.src.wechat.WechatCenter import WechatCenter
+from bargetor.wechat.WechatCenter import WechatCenter
 
 import traceback
 

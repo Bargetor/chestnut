@@ -1,4 +1,4 @@
-from chestnut.src.wechat.Wechat import Wechat
+from bargetor.wechat.Wechat import Wechat
 
 import logging
 

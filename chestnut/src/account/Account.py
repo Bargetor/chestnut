@@ -1,4 +1,4 @@
-from common import UserUtil
+from bargetor.common import UserUtil
 from chestnut.src import ChestnutModelDao
 
 def signup(wechat_username, wechat_password, wechat_default_id, wecaht_token = None):
