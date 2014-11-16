@@ -6,8 +6,8 @@ import json
 import hashlib
 import xml.etree.ElementTree as ET
 
-from common import HTMLUtil
-from common.JsonUtil import JsonObject
+from bargetor.common import HTMLUtil
+from bargetor.common.JsonUtil import JsonObject
 
 import logging
 import traceback

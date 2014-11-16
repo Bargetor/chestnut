@@ -1,6 +1,6 @@
 from django.db import models
 
-from common import EncryptionUtil
+from bargetor.common import EncryptionUtil
 
 class ChestnutUser(models.Model):
     """docstring for ChestnutUser"""

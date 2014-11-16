@@ -38,8 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'chestnut',
-    'api',
-    'common',
+    'bargetor',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -136,18 +135,18 @@ LOGGING = {
             'backupCount': 5,
             'formatter':'standard',
         },
-        'scprits_handler': {
+        'bargetor_wechat_handler': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join('logs/','script.log'), #或者直接写路径：'filename':'c:/logs/script.log'
+            'filename': os.path.join('logs/','bargetor.wechat.log'), #或者直接写路径：'filename':'c:/logs/script.log'
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'standard',
         },
-        'api_handler': {
+        'bargetor_api_handler': {
             'level':'DEBUG',
             'class':'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join('logs/','api.log'), #或者直接写路径：'filename':'c:/logs/script.log'
+            'filename': os.path.join('logs/','bargetor.api.log'), #或者直接写路径：'filename':'c:/logs/script.log'
             'maxBytes': 1024*1024*5, # 5 MB
             'backupCount': 5,
             'formatter':'standard',
@@ -172,13 +171,13 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False
         },
-        'scripts': { # 脚本专用日志
-            'handlers': ['scprits_handler'],
+        'bargetor.api': { # api专用日志
+            'handlers': ['bargetor_api_handler'],
             'level': 'INFO',
             'propagate': False
         },
-        'api': { # api专用日志
-            'handlers': ['api_handler'],
+        'bargetor.wechat': { # api专用日志
+            'handlers': ['bargetor_wechat_handler'],
             'level': 'INFO',
             'propagate': False
         },

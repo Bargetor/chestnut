@@ -1,13 +1,13 @@
 import hashlib
 import time
-from common import ArrayUtil
-from api.APISettings import MY_WECHAT_TOKEN
-from api.src.APIRequest import *
-from common.XMLUtil import *
-from api.APISettings import *
-from api.src.ReplyData import *
+from bargetor.common import ArrayUtil
+from bargetor.api.APISettings import MY_WECHAT_TOKEN
+from bargetor.api.src.APIRequest import *
+from bargetor.common.XMLUtil import *
+from bargetor.api.APISettings import *
+from bargetor.api.src.ReplyData import *
 
-from common import EncryptionUtil
+from bargetor.common import EncryptionUtil
 
 class BaseAPIResponse(object):
     """docstring for BaseAPIResponse"""

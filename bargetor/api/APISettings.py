@@ -73,19 +73,19 @@ REQUEST_RESPONSER_CONFIG_NAME = 'responser'
 REQUEST_LISTENER_CONFIG_NAME = 'listener'
 
 request_processer_list = [
-                            {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.SignatureRequestParser",
-                             REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.SignatureAPIResponse",
+                            {REQUEST_PARSER_CONFIG_NAME:"bargetor.api.src.APIParser.SignatureRequestParser",
+                             REQUEST_RESPONSER_CONFIG_NAME:"bargetor.api.src.APIResponse.SignatureAPIResponse",
                              REQUEST_LISTENER_CONFIG_NAME:[
                                 "",
                              ]},
 
-                             {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.MessageRequestParser",
+                             {REQUEST_PARSER_CONFIG_NAME:"bargetor.api.src.APIParser.MessageRequestParser",
                               REQUEST_RESPONSER_CONFIG_NAME:"chestnut.src.ChestnutAPI.ChestnutWeChatMessageAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "chestnut.src.ChestnutAPI.ChestnutWeChatTextMessageAPIListener",
                              ]},
-                             {REQUEST_PARSER_CONFIG_NAME:"api.src.APIParser.EventRequestParser",
-                              REQUEST_RESPONSER_CONFIG_NAME:"api.src.APIResponse.EventAPIResponse",
+                             {REQUEST_PARSER_CONFIG_NAME:"bargetor.api.src.APIParser.EventRequestParser",
+                              REQUEST_RESPONSER_CONFIG_NAME:"bargetor.api.src.APIResponse.EventAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "",
                              ]},

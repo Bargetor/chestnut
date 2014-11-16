@@ -1,5 +1,5 @@
-from api.src.APIRequest import *
-from api.APISettings import *
+from bargetor.api.src.APIRequest import *
+from bargetor.api.APISettings import *
 
 class BaseAPIParser(object):
     """docstring for BaseAPIParser"""

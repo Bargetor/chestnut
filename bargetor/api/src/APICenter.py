@@ -1,9 +1,10 @@
 from django.http import HttpResponse
-from api.src.APIParser import BaseAPIParser
-from api.src.APIRequest import APIRequestData
-from api.src.APIProcesser import APIProcesser
-import api.APISettings as settings
-from common import ClassUtil
+from bargetor.api.src.APIParser import BaseAPIParser
+from bargetor.api.src.APIRequest import APIRequestData
+from bargetor.api.src.APIProcesser import APIProcesser
+from bargetor.common import ClassUtil
+import bargetor.api.APISettings as settings
+
 import logging
 import traceback
 

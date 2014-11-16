@@ -1,4 +1,4 @@
-from api.src import APIRequest
+from bargetor.api.src import APIRequest
 from django.http import HttpResponse
 from django.contrib import auth
 

@@ -9,8 +9,8 @@ urlpatterns = [
     url(r'^$', 'chestnut.views.index', name='index'),
 
     #api
-    url(r'^api/', include('api.urls', namespace= 'api')),
-    url(r'^api$', include('api.urls', namespace= 'api')),
+    url(r'^api/', include('bargetor.api.urls', namespace= 'api')),
+    url(r'^api$', include('bargetor.api.urls', namespace= 'api')),
 
     #admin
     url(r'^admin/', include(admin.site.urls)),

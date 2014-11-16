@@ -1,12 +1,12 @@
 #-*- coding: utf-8 -*-
 
-from api.src.APIParser import BaseAPIParser
-from api.src.APIRequest import BaseAPIRequest
-from api.src.APIResponse import BaseAPIResponse
-from api.src.APIListener import BaseAPIListener
-from api.src.ReplyData import NewsReplyData
-from common.TimeUtil import *
-from common import UserUtil
+from bargetor.api.src.APIParser import BaseAPIParser
+from bargetor.api.src.APIRequest import BaseAPIRequest
+from bargetor.api.src.APIResponse import BaseAPIResponse
+from bargetor.api.src.APIListener import BaseAPIListener
+from bargetor.api.src.ReplyData import NewsReplyData
+from bargetor.common.TimeUtil import *
+from bargetor.common import UserUtil
 from chestnut.src import ChestnutModelDao
 
 from chestnut.models import *

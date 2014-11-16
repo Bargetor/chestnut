@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 #客户请求与被动消息响应属于两个应用场景，但属于同等数据结构
 import time
-from common.XMLUtil import *
-from api.APISettings import *
-from common.JsonUtil import JsonObject
+from bargetor.common.XMLUtil import *
+from bargetor.api.APISettings import *
+from bargetor.common.JsonUtil import JsonObject
 
 class BaseReplyData(object):
     """docstring for BaseReplyData"""

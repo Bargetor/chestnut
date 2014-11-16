@@ -1,4 +1,4 @@
-from api.APISettings import CHARSET
+from bargetor.api.APISettings import CHARSET
 import sys
 
 reload(sys)

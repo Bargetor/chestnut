@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import hashlib
-from common import ArrayUtil, XMLUtil
-from api.APISettings import *
+from bargetor.common import ArrayUtil, XMLUtil
+from bargetor.api.APISettings import *
 
 class APIRequestData(object):
     """docstring for APIRequestData"""

@@ -1,9 +1,9 @@
-from api.src.APIParser import BaseAPIParser
-from api.src.APIResponse import BaseAPIResponse
-from api.src.APIListener import BaseAPIListener
+from bargetor.api.src.APIParser import BaseAPIParser
+from bargetor.api.src.APIResponse import BaseAPIResponse
+from bargetor.api.src.APIListener import BaseAPIListener
 from django.http import HttpResponse
-from common.ClassUtil import *
-from api.APISettings import *
+from bargetor.common.ClassUtil import *
+from bargetor.api.APISettings import *
 
 import traceback
 import logging
