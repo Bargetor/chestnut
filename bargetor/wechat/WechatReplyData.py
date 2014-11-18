@@ -2,7 +2,7 @@
 #客户请求与被动消息响应属于两个应用场景，但属于同等数据结构
 import time
 from bargetor.common.XMLUtil import *
-from bargetor.api.APISettings import *
+from bargetor.wechat.WechatConstant import *
 from bargetor.common.JsonUtil import JsonObject
 
 class BaseReplyData(object):

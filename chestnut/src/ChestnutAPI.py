@@ -4,7 +4,7 @@ from bargetor.api.src.APIParser import BaseAPIParser
 from bargetor.api.src.APIRequest import BaseAPIRequest
 from bargetor.api.src.APIResponse import BaseAPIResponse
 from bargetor.api.src.APIListener import BaseAPIListener
-from bargetor.api.src.ReplyData import NewsReplyData
+from bargetor.wechat.WechatReplyData import NewsReplyData
 from bargetor.common.TimeUtil import *
 from bargetor.common import UserUtil
 from chestnut.src import ChestnutModelDao

@@ -1,9 +1,29 @@
 # -*- coding: utf-8 -*-
 import hashlib
 from bargetor.common import ArrayUtil, XMLUtil
-from bargetor.api.APISettings import *
+from bargetor.wechat.WechatConstant import *
 from bargetor.api.src.APIRequest import APIRequestData, BaseAPIRequest
 
+
+
+class SignatureAPIRequest(BaseAPIRequest):
+    """docstring for SignatureAPIRequest"""
+    def __init__(self, request_data):
+        super(SignatureAPIRequest, self).__init__(request_data)
+
+        self.token = None
+        self.signature = None
+        self.time_stamp = None
+        self.nonce = None
+        self.echostr = None
+
+        self.__load_request_data(request_data)
+
+    def __load_request_data(self, request_data):
+        self.signature = request_data.request_get_data.get('signature')
+        self.timestamp = request_data.request_get_data.get('timestamp')
+        self.nonce = request_data.request_get_data.get('nonce')
+        self.echostr = request_data.request_get_data.get('echostr')
 
 class BaseWeChatAPIRequest(BaseAPIRequest):
     """docstring for BaseWeChatAPIRequest"""

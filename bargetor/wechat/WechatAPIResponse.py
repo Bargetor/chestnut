@@ -2,10 +2,9 @@ import hashlib
 import time
 from bargetor.api.src.APIResponse import BaseAPIResponse
 from bargetor.common import ArrayUtil
-from bargetor.api.APISettings import MY_WECHAT_TOKEN
 from bargetor.wechat.WechatAPIRequest import *
-from bargetor.api.APISettings import *
-from bargetor.api.src.ReplyData import *
+from bargetor.wechat.WechatConstant import *
+from bargetor.wechat.WechatReplyData import *
 
 from bargetor.common import EncryptionUtil
 
