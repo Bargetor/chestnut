@@ -1,7 +1,7 @@
 chestnut
 ========
 
-python for wechat public account
+微信与WordPress的联姻，开启个人博客的订阅时代。
 
 
 项目依赖
