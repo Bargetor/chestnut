@@ -15,7 +15,7 @@ request_processer_list = [
                                  "chestnut.src.ChestnutAPI.ChestnutWeChatTextMessageAPIListener",
                              ]},
                              {REQUEST_PARSER_CONFIG_NAME:"bargetor.wechat.WechatAPIParser.EventRequestParser",
-                              REQUEST_RESPONSER_CONFIG_NAME:"bargetor.api.src.APIResponse.EventAPIResponse",
+                              REQUEST_RESPONSER_CONFIG_NAME:"bargetor.wechat.WechatAPIResponse.EventAPIResponse",
                               REQUEST_LISTENER_CONFIG_NAME:[
                                  "",
                              ]},
