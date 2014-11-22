@@ -1,6 +1,6 @@
 from bargetor.wechat.WechatConstant import *
 from bargetor.api.src.APIParser import BaseAPIParser
-from bargetor.wechat.WechatAPIRequest import *
+from bargetor.wechat.WechatAPIRequestData import *
 
 
 class SignatureRequestParser(BaseAPIParser):

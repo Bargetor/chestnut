@@ -2,7 +2,7 @@ import hashlib
 import time
 from bargetor.api.src.APIResponse import BaseAPIResponse
 from bargetor.common import ArrayUtil
-from bargetor.wechat.WechatAPIRequest import *
+from bargetor.wechat.WechatAPIRequestData import *
 from bargetor.wechat.WechatConstant import *
 from bargetor.wechat.WechatReplyData import *
 
