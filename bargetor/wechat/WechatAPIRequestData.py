@@ -181,9 +181,17 @@ class LocationEventAPIRequest(EventAPIRequest):
         self.precision = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_PRECISION)
 
 
-class CustomMenuEventAPIRequest(EventAPIRequest):
+class CustomMenuEventAPIRequestData(EventAPIRequest):
     """docstring for CustomMenuEventAPIRequest"""
     def __init__(self, request_data):
         super(CustomMenuEventAPIRequest, self).__init__(request_data)
 
         self.event_key = request_data.request_post_xml_dic.get(POST_DATA_TAG_NAME_EVENT_KEY)
+
+class CustomMenuClickEventAPIRequestData(CustomMenuEventAPIRequestData):
+    def __init__(self, request_data):
+        return super(CustomMenuClickEventAPIRequestData, self).__init__(request_data)
+
+class CustomMenuViewEventAPIRequestData(CustomMenuEventAPIRequestData):
+    def __init__(self, request_data):
+        return super(CustomMenuViewEventAPIRequestData, self).__init__(request_data)

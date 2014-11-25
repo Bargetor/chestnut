@@ -79,4 +79,13 @@ class EventRequestParser(BaseAPIParser):
             if event_type == POST_DATA_EVENT_TYPE_UNSUBSCRIBE:
                 return UnSubscribeEventAPIRequest(request_data)
 
+            if event_type == POST_DATA_EVENT_TYPE_LOCATION:
+                return LocationEventAPIRequest(request_data)
+
+            if event_type == POST_DATA_EVENT_TYPE_CLICK:
+                return CustomMenuClickEventAPIRequestData(request_data)
+
+            if event_type == POST_DATA_EVENT_TYPE_VIEW:
+                return CustomMenuViewEventAPIRequestData(request_data)
+
             return super(EventRequestParser, self).parse(request_data)
