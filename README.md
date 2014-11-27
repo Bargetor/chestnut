@@ -8,6 +8,6 @@ chestnut
 ========
 1.html5lib https://github.com/html5lib/html5lib-python
 
-2.selenium
+2.selenium pip install selenium
 
-3.chromedriver
+3.phantomjs   http://phantomjs.org/ to /usr/local/bin
