@@ -87,5 +87,6 @@ class EventAPIResponse(BaseAPIResponse):
     def response(self, request):
         if not request:
             return super(EventAPIResponse, self).response(request)
+        print request
         return request.event
 
