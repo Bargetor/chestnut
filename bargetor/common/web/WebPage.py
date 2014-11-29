@@ -40,11 +40,6 @@ class WebPage(object):
             return urllib2.Request(self.url, urllib.urlencode(self.params))
         return urllib2.Request(self.url)
 
-    def _build_headers(self):
-        return None
-
-    def _build_parmas(self):
-        return None
 
     def __set_headers(self, request):
         if request is None or self.headers is None: return

@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-import urllib
-import urllib2
-import cookielib
 import json
-import hashlib
-import random
-import xml.etree.ElementTree as ET
 from bargetor.common.web.WebPage import WebPage
+from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
+from bargetor.wechat.WechatRequest import *
 
 from bargetor.common import HTMLUtil, ReUtil
 from bargetor.common.JsonUtil import JsonObject
@@ -30,6 +26,9 @@ class WechatFollowerPage(WebPage):
 
         send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
         send_text_request.send()
+
+        get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
+        print get_follower_info_reqeust.get_info()
 
     def __build_follower_info(self):
         self.__process_follower_page(0)
@@ -129,8 +128,6 @@ class WechatFollowerPage(WebPage):
             self.groups = dict()
             #为了排重，以ID为key
             self.followers = dict()
-
-
 
 
 class WechatSettingPage(WebPage):
@@ -239,112 +236,3 @@ class WechatSettingPage(WebPage):
                 exstr = traceback.format_exc()
                 log.error(exstr)
 
-
-class WechatLoginRequest(WebPage):
-    def __init__(self,  username = None, password = None):
-        self.url = 'https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN'
-        super(WechatLoginRequest, self).__init__(self.url)
-
-        self.username = username
-        self.password = password
-        self.request_token = None
-        self.login_ret = 99999999
-
-        self.setting_page = None
-        self.follower_page = None
-
-    def __build_home_page_header(self):
-        headers = build_wechat_base_request_headers()
-        headers['Accept-Encoding'] = 'gzip,deflate,sdch'
-        headers['Content-Length'] = '79'
-        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/loginpage?t=wxm2-login&lang=zh_CN'
-        self.headers = headers
-        return headers
-
-    def __build_request_param(self):
-        paras = {'username':self.username, 'pwd':self.password, 'imgcode':'', 'f':'json'}
-        self.params = paras
-        return paras
-
-    def login(self):
-
-        if not self.username or not self.password: return
-
-        self.__build_request_param()
-        self.__build_home_page_header()
-
-        self.open(True)
-        self.__find_token()
-        return self.request_token
-
-    def __find_token(self):
-        response_json = json.loads(self.content)
-        ret = response_json['base_resp']['ret']
-        self.login_ret = ret
-        if not self.is_login() : return None
-
-        token = response_json['redirect_url'][44:]
-
-        self.request_token = token
-        return token
-
-    def is_login(self):
-        return self.login_ret == 0
-
-class WechatSingleSendRequest(WebPage):
-    def __init__(self, request_token, to_fake_id):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response&f=json&lang=zh_CN"
-        self.base_referer_url = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatSingleSendRequest, self).__init__(self.url)
-
-        self.request_token = request_token
-        self.to_fake_id = to_fake_id
-
-    def send(self):
-        self.headers = self._build_send_request_headers()
-        self.params = self._build_send_request_params()
-
-        self.open()
-
-    def _build_send_request_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "%s&token=%s&tofakeid=%s" % (self.base_referer_url, self.request_token, self.to_fake_id)
-        return headers
-
-    def _build_send_request_params(self):
-        params = dict()
-        params['token'] = self.request_token
-        params['lang'] = "zh_CN"
-        params['f'] = "json"
-        params['ajax'] = "1"
-        params['random'] = str(random.random())
-        params['tofakeid'] = self.to_fake_id
-        params['imgcode'] = ''
-        return params
-
-class WechatSingleSendTextRequest(WechatSingleSendRequest):
-    def __init__(self, request_token, to_fake_id):
-        super(WechatSingleSendTextRequest, self).__init__(request_token, to_fake_id)
-
-    def _build_send_request_params(self):
-        params = super(WechatSingleSendTextRequest, self)._build_send_request_params()
-        params['type'] = "1"
-        params['content'] = "你好"
-        return params
-
-# *************************public method ********************************* #
-
-def build_wechat_base_request_headers():
-    headers = dict()
-
-    headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
-    headers['Accept-Language'] = 'zh-CN,zh;q=0.8'
-    headers['Connection'] = 'keep-alive'
-    headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-    headers['Host'] = 'mp.weixin.qq.com'
-    headers['Origin'] = 'https://mp.weixin.qq.com'
-    headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36'
-    headers['X-Requested-With'] = 'XMLHttpRequest'
-
-    return headers

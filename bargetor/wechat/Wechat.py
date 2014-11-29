@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from bargetor.wechat.WechatPage import *
+from bargetor.wechat.WechatRequest import *
 
 import logging
 import traceback
