@@ -165,3 +165,11 @@ class WechatSingleSendTextRequest(WechatSingleSendRequest):
         params['content'] = "你好，该消息来自伟大的chestnut!"
         return params
 
+class WechatMaterialUploadRequest(WechatRequest):
+    """docstring for WechatMaterialUploadRequest"""
+    def __init__(self, request_token, ticket):
+        self.url = ''
+        super(WechatMaterialUploadRequest, self).__init__(self.url)
+        self.request_token = request_token
+        self.ticket = ticket
+

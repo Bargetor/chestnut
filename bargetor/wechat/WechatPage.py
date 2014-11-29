@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import re
 from bargetor.common.web.WebPage import WebPage
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatRequest import *
@@ -12,7 +13,39 @@ import traceback
 
 log = logging.getLogger(__name__)
 
-class WechatFollowerPage(WebPage):
+
+class WechatCGIDataPage(WebPage):
+    """docstring for WechatRequest"""
+    def __init__(self, url, params = None, headers = None):
+        super(WechatCGIDataPage, self).__init__(url)
+
+        self.cgi_data = None
+
+    def open(self, is_need_cookes = False):
+        super(WechatCGIDataPage, self).open(is_need_cookes)
+
+        self.cgi_data = self._process_cgi_data()
+
+    def _process_cgi_data(self):
+        js = self._find_cgi_data_javascript()
+        js = self._format_cgi_data_javascript(js)
+        cgi_data_json = self.exe_js_not_in_content(js)
+        if cgi_data_json:
+            cgi_data_json = cgi_data_json.replace('\t', '')
+            return json.loads(cgi_data_json)
+        return None
+
+    def _find_cgi_data_javascript(self):
+        results = re.findall(r'wx\.cgiData[^;]+};', self.content)
+        if not results : return
+        return results[0]
+
+    def _format_cgi_data_javascript(self, js):
+        return "var wx = {}; %s ; return wx.cgiData;" % js
+
+
+
+class WechatFollowerPage(WechatCGIDataPage):
     """docstring for WechatFollowerPage"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&type=0&lang=zh_CN&token=%s" % request_token
@@ -22,13 +55,18 @@ class WechatFollowerPage(WebPage):
 
         self.__build_follower_info()
 
-        follower = self.follower_info.followers.get('1159047001')
+        image_page = WecahtImageMaterialPage(self.request_token)
+        image_page.open()
+        print image_page.ticket
 
-        send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
-        send_text_request.send()
 
-        get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
-        print get_follower_info_reqeust.get_info()
+        # follower = self.follower_info.followers.get('1159047001')
+
+        # send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
+        # send_text_request.send()
+
+        # get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
+        # print get_follower_info_reqeust.get_info()
 
     def __build_follower_info(self):
         self.__process_follower_page(0)
@@ -42,9 +80,7 @@ class WechatFollowerPage(WebPage):
 
     def __process_follower_page(self, follower_page_index = 0, follower_page_size = 10):
         self.__request_wechat_follower_page(follower_page_index, follower_page_size)
-        self.follower_home_page_dom = HTMLUtil.build_html_dom_from_str(self.content)
-        follower_info_json = self.__find_follower_info_json()
-        self.__process_follower_info_json(follower_info_json)
+        self.__process_follower_info_json(self.cgi_data)
 
     def __request_wechat_follower_page(self, follower_page_index = 0, follower_page_size = 10):
         if not self.request_token: return
@@ -57,32 +93,6 @@ class WechatFollowerPage(WebPage):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
         return headers
-
-    def __find_follower_info_json(self):
-        follower_info_javascript = self.__find_follower_info_javascript()
-
-        if not follower_info_javascript : return
-        follower_info_json_str = self.exe_js_not_in_content(follower_info_javascript)
-        return json.loads(follower_info_json_str)
-
-    def __find_follower_info_javascript(self):
-        body = self.follower_home_page_dom.getElementsByTagName('body')[0];
-        javascript_elements = body.getElementsByTagName('script')
-        follower_info_javascript_element = javascript_elements[len(javascript_elements) - 1]
-        follower_info_javascript = HTMLUtil.find_element_content(follower_info_javascript_element)
-        if follower_info_javascript is None : return
-
-        return self.__process_follower_info_js(follower_info_javascript)
-
-    def __process_follower_info_js(self, follower_info_javascript):
-        if not follower_info_javascript : return None
-        js = follower_info_javascript
-        js = str(js).replace('\n', '')
-        js = js.replace(' ', '')
-
-        js =  js.replace("""seajs.use('user/index',wx_main);;""", '')
-        js = "(function(){var wx = {};%s return wx.cgiData;})()" % js
-        return js
 
     def __process_follower_info_json(self, follower_info_json):
         if not follower_info_json : return
@@ -236,3 +246,80 @@ class WechatSettingPage(WebPage):
                 exstr = traceback.format_exc()
                 log.error(exstr)
 
+
+class WechatMaterialPage(WechatCGIDataPage):
+    """docstring for WechatMaterialPage"""
+    def __init__(self, url, request_token):
+        super(WechatMaterialPage, self).__init__(url)
+
+        self.request_token = request_token
+        self.ticket = None
+        self.uin = None
+        self.uin_base64 = None
+        self.user_name = None
+        self.nick_name = None
+
+    def open(self):
+        self.headers = self.__build_material_reqeust_headers()
+
+        super(WechatMaterialPage, self).open()
+        self._process_material_params()
+
+    def __build_material_reqeust_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&t=media/appmsg_list&type=10&action=list&lang=zh_CN&token=%s" % self.request_token
+        return headers
+
+    def _process_material_params(self):
+        params_javascript = self._find_material_params_javascript()
+        format_parasm_javascript = self._format_material_params_javascript(params_javascript)
+        params_json_str = self.exe_js_not_in_content(format_parasm_javascript)
+        params_json = json.loads(params_json_str)
+
+        if not params_json : return None
+        data = params_json.get('data')
+
+        self.ticket = data.get('ticket')
+        self.uin = data.get('uin')
+        self.uin_base64 = data.get('uin_base64')
+        self.user_name = data.get('user_name')
+        self.nick_name = data.get('nick_name')
+
+    def _find_material_params_javascript(self):
+        results = re.findall(r'window\.wx[^;]+};', self.content)
+        if not results : return
+        return results[0]
+
+    def _format_material_params_javascript(self, js):
+        if not js : return None
+        return '%s; return window.wx;' % js
+
+class WecahtImageMaterialPage(WechatMaterialPage):
+    """docstring for WecahtImageMaterialPage"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN"
+        self.url = "%s&token=%s" % (self.base_url, request_token)
+        super(WecahtImageMaterialPage, self).__init__(self.url, request_token)
+
+        self.file_count = 0
+        self.file_list = dict()
+
+    def open(self):
+        super(WecahtImageMaterialPage, self).open()
+
+        self.__build_file_data()
+
+        print self.file_count
+        print self.file_list
+
+    def __build_file_data(self):
+        if self.cgi_data is None : return
+        self.file_count = int(self.cgi_data.get('page').get('file_cnt').get('img_cnt'))
+        file_items = self.cgi_data.get('page').get('file_item')
+        for key,value in file_items.items():
+            f = dict()
+            f['file_id'] = value['file_id']
+            f['file_name'] = value['name']
+            f['update_time'] = value['update_time']
+            f['cdn_url'] = value['cdn_url']
+            self.file_list[f['file_id']] = f
