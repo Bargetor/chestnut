@@ -11,3 +11,5 @@ chestnut
 2.selenium pip install selenium
 
 3.phantomjs   http://phantomjs.org/ to /usr/local/bin
+
+4.MultipartPostHandler pip install MultipartPostHandler
