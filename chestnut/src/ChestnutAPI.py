@@ -1,4 +1,3 @@
-#-*- coding: utf-8 -*-
 
 from bargetor.api.src.APIParser import BaseAPIParser
 from bargetor.api.src.APIRequest import BaseAPIRequest

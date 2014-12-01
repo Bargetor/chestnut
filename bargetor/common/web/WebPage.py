@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding:utf-8 -*-
 import selenium
 from selenium import webdriver
 import Exescript
@@ -6,6 +6,7 @@ import json
 import urllib
 import urllib2
 import cookielib
+import MultipartPostHandler
 import json
 import hashlib
 import xml.etree.ElementTree as ET
@@ -26,7 +27,7 @@ class WebPage(object):
             opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
             urllib2.install_opener(opener)
 
-        request = self.__build_request()
+        request = self._build_request()
         if not request : return
         self.__set_headers(request)
         ret = urllib2.urlopen(request)
@@ -34,10 +35,11 @@ class WebPage(object):
         ret.close()
 
 
-    def __build_request(self):
+    def _build_request(self):
         if self.url is None : return None
         if self.params :
-            return urllib2.Request(self.url, urllib.urlencode(self.params))
+            # 如果不把 url 转化成 str 类型 那么在 httplib 827 行就会出现编码错误
+            return urllib2.Request(str(self.url), urllib.urlencode(self.params))
         return urllib2.Request(self.url)
 
 
@@ -52,10 +54,35 @@ class WebPage(object):
 
         exejs = Exescript.ExeJs(browser)
         exejs.exeWrap(js_str)
-        result = exejs.getMsg().encode('utf-8')
+        result = exejs.getMsg()
 
         browser.close()
         return result
+
+class WebUpLoadRequest(WebPage):
+    """docstring for WebUpLoadRequest"""
+    def __init__(self, url, params = None, headers = None):
+        super(WebUpLoadRequest, self).__init__(url, params, headers)
+
+        self.file_param_name = None
+        slef.file_name = None
+
+    def upload(self, file_param_name, file_name):
+        self.file_param_name = file_param_name
+        self.file_name = file_name
+
+        self.__build_file_upload_params()
+        cookies = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),MultipartPostHandler.MultipartPostHandler)
+        urllib2.install_opener(opener)
+
+        self.open()
+
+    def __build_file_upload_params(self):
+        if self.params is None:
+            self.params = dict()
+        if self.file_param_name is None : return
+        self.params[self.file_param_name] = open(self.file_name, 'rb')
 
 driver_class_list = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox, webdriver.Safari,]
 
@@ -68,104 +95,3 @@ def get_driver():
             print e
             continue
 
-
-# class WechatLoginTest(WebPage):
-#     def __init__(self,  username = None, password = None):
-#         self.url = 'https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN'
-#         super(WechatLoginTest, self).__init__(self.url, params = None, headers = None)
-
-#         self.username = username
-#         self.password = password
-#         self.request_token = None
-#         self.login_ret = 99999999
-
-#         self.setting_page = None
-#         self.follower_page = None
-
-#     def __build_home_page_header(self):
-#         headers = dict()
-
-#         headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
-#         headers['Accept-Encoding'] = 'gzip,deflate,sdch'
-#         headers['Accept-Language'] = 'zh-CN,zh;q=0.8'
-#         headers['Connection'] = 'keep-alive'
-#         headers['Content-Length'] = '79'
-#         headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8'
-#         headers['Host'] = 'mp.weixin.qq.com'
-#         headers['Origin'] = 'https://mp.weixin.qq.com'
-#         headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/loginpage?t=wxm2-login&lang=zh_CN'
-#         headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/29.0.1547.76 Safari/537.36'
-#         headers['X-Requested-With'] = 'XMLHttpRequest'
-
-#         self.headers = headers
-#         return headers
-
-#     def __build_request_param(self):
-#         pwd = md5(self.password)
-#         paras = {'username':self.username,'pwd':pwd,'imgcode':'','f':'json'}
-#         self.params = paras
-#         return paras
-
-#     def wechat_auto_login(self):
-
-#         if not self.username or not self.password: return
-
-#         self.__build_request_param()
-#         self.__build_home_page_header()
-
-#         self.open(True)
-
-#         response_json = json.loads(self.content)
-#         ret = response_json['base_resp']['ret']
-#         self.login_ret = ret
-#         if not self.is_login() : return
-
-#         token = response_json['redirect_url'][44:]
-
-#         self.request_token = token
-#         return token
-
-#     def is_login(self):
-#         return self.login_ret == 0
-
-# def md5(string):
-#     md5 = hashlib.md5()
-#     md5.update(string)
-#     md5_str = md5.hexdigest()
-#     return md5_str
-
-# wechat = WechatLoginTest('bargetor_public@sina.com', 'lanqiao@mj')
-# print wechat.wechat_auto_login()
-
-
-
-# browser = get_driver()
-
-
-# script = """(function(){
-#                        var wx = {};
-#                        wx.cgiData={
-#         isVerifyOn: "0"*1,
-#         pageIdx : 0,
-#             pageCount : 2,
-#             pageSize : 10,
-#             groupsList : ({"groups":[{"id":0,"name":"未分组","cnt":14},{"id":1,"name":"黑名单","cnt":0},{"id":2,"name":"星标组","cnt":0}]}).groups,
-#                         friendsList : ({"contacts":[{"id":1269538680,"nick_name":"设计师Milk","remark_name":"","group_id":0},{"id":1012287535,"nick_name":"MI_Sunnywang","remark_name":"","group_id":0},{"id":1224124520,"nick_name":"娜娜","remark_name":"","group_id":0},{"id":1421696461,"nick_name":"三分之一理想","remark_name":"","group_id":0},{"id":1159047001,"nick_name":"蓝桥","remark_name":"","group_id":0},{"id":978392661,"nick_name":"青青","remark_name":"","group_id":0},{"id":975727223,"nick_name":"lip","remark_name":"","group_id":0},{"id":671434682,"nick_name":"Labber","remark_name":"","group_id":0},{"id":26285015,"nick_name":"Vlaminck","remark_name":"","group_id":0},{"id":161762635,"nick_name":"x z","remark_name":"","group_id":0}]}).contacts,
-#                                     currentGroupId : '',
-#                         type : "0" * 1 || 0,
-#             userRole : '1' * 1,
-#             verifyMsgCount : '0' * 1,
-#             totalCount : '14' * 1
-#     };
-#     return wx.cgiData;
-#     })()"""
-
-# exejs = Exescript.ExeJs(browser)
-# exejs.exeWrap(script)
-# data_json_str = exejs.getMsg().encode('utf-8')
-
-# print json.loads(str(data_json_str))
-
-
-
-# browser.close()

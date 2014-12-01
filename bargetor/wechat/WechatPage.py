@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import os
 from bargetor.common.web.WebPage import WebPage
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatRequest import *
@@ -54,11 +55,6 @@ class WechatFollowerPage(WechatCGIDataPage):
         self.follower_info = self.WechatFollowerInfo()
 
         self.__build_follower_info()
-
-        image_page = WecahtImageMaterialPage(self.request_token)
-        image_page.open()
-        print image_page.ticket
-
 
         # follower = self.follower_info.followers.get('1159047001')
 
@@ -190,10 +186,9 @@ class WechatSettingPage(WebPage):
         return item
 
     def __confirm_account_info(self, account_info_item):
-        name = account_info_item['name'].encode('utf-8')
+        name = account_info_item['name']
         content = account_info_item['content']
-        if content is not None:
-            content = content.encode('utf-8')
+
         if not name: return
         if name == '名称':
             self.account_info.name = content
@@ -309,8 +304,12 @@ class WecahtImageMaterialPage(WechatMaterialPage):
 
         self.__build_file_data()
 
-        print self.file_count
-        print self.file_list
+    def upload(self, file_name):
+        if not self.user_name or not self.ticket : return
+
+        upload_request = WechatImageMaterialUploadRequest(self.request_token, self.user_name, self.ticket)
+        upload_request.upload(file_name)
+        print upload_request.response_json
 
     def __build_file_data(self):
         if self.cgi_data is None : return

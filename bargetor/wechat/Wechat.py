@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from bargetor.wechat.WechatPage import *
 from bargetor.wechat.WechatRequest import *
 
@@ -18,6 +17,7 @@ class Wechat(object):
         self.login_page = None
         self.setting_page = None
         self.follower_page = None
+        self.image_page = None
 
     def wechat_login(self):
         if not self.username or not self.password: return None
@@ -36,6 +36,15 @@ class Wechat(object):
     def request_wechat_follower_page(self):
         self.follower_page = WechatFollowerPage(self.request_token)
         return self.follower_page
+
+    def request_wechat_image_page(self):
+        self.image_page = WecahtImageMaterialPage(self.request_token)
+        self.image_page.open()
+        print self.image_page.request_token
+        print self.image_page.user_name
+        print self.image_page.ticket
+
+        self.image_page.upload('/Users/Bargetor/Documents/temp/user.png')
 
     def is_login(self):
         return self.login_page and self.login_page.is_login()

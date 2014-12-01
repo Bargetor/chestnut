@@ -27,9 +27,9 @@ def get_children_text_dic(element, charset = 'utf-8'):
             continue
         key = child.tag
         value = child.text
-        if charset:
-            key = key.decode(charset)
-            value = value.decode(charset)
+        # if charset:
+        #     key = key.decode(charset)
+        #     value = value.decode(charset)
         result[key] = value
     return result
 

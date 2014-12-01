@@ -1,6 +1,11 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 import json
 import random
+import os
+import urllib
+import urllib2
+import cookielib
+import MultipartPostHandler
 
 from bargetor.common.web.WebPage import WebPage
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
@@ -162,14 +167,58 @@ class WechatSingleSendTextRequest(WechatSingleSendRequest):
     def _build_send_request_params(self):
         params = super(WechatSingleSendTextRequest, self)._build_send_request_params()
         params['type'] = "1"
-        params['content'] = "你好，该消息来自伟大的chestnut!"
+        params['content'] = "该消息来自伟大的chestnut!"
         return params
 
 class WechatMaterialUploadRequest(WechatRequest):
     """docstring for WechatMaterialUploadRequest"""
-    def __init__(self, request_token, ticket):
-        self.url = ''
+    def __init__(self, request_token, user_name, ticket):
         super(WechatMaterialUploadRequest, self).__init__(self.url)
         self.request_token = request_token
+        self.user_name = user_name
         self.ticket = ticket
+
+        self.file_name = None
+
+    def upload(self, file_name):
+
+        if not file_name : return
+        if not os.path.exists(file_name) : return
+
+        self.file_name = file_name
+        self.params = self.__build_file_upload_params()
+        self.headers = self.__build_file_upload_headers()
+        cookies = cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),MultipartPostHandler.MultipartPostHandler)
+        urllib2.install_opener(opener)
+
+        self.open()
+
+    def _build_request(self):
+        print 'upload request'
+        if self.url is None : return None
+        if self.params :
+            return urllib2.Request(str(self.url), self.params)
+        return urllib2.Request(self.url)
+
+    def __build_file_upload_params(self):
+        params = dict()
+        file_name = os.path.basename(self.file_name)
+        params['Filename'] = file_name
+        params['folder'] = '/cgi-bin/uploads'
+        params['Upload'] = 'Submit Query'
+        params['file'] = open(self.file_name, 'rb')
+        return params
+
+    def __build_file_upload_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN&token=%s" % self.request_token
+        return headers
+
+class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
+    """docstring for WechatImageMaterialUploadRequest"""
+    def __init__(self, request_token, user_name, ticket):
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
+        self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
+        super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
 
