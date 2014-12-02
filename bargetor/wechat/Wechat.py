@@ -18,6 +18,7 @@ class Wechat(object):
         self.setting_page = None
         self.follower_page = None
         self.image_page = None
+        self.dev_setting_page = None
 
     def wechat_login(self):
         if not self.username or not self.password: return None
@@ -44,6 +45,12 @@ class Wechat(object):
         self.image_page.open()
 
         self.image_page.upload('/Users/Bargetor/Documents/temp/user.png')
+
+    def request_wechat_dev_setting_page(self):
+        self.dev_setting_page = WechatDevSettingPage(self.request_token)
+        self.dev_setting_page.open()
+
+        self.dev_setting_page.modify_server_setting('http://www.bargetor.com/chestnut_proxy.php?wechat_user=bargetor_public@sina.com', 'bargetor_chestnut')
 
     def is_login(self):
         return self.login_page and self.login_page.is_login()

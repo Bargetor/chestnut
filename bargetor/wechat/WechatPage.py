@@ -307,3 +307,31 @@ class WecahtImageMaterialPage(WechatMaterialPage):
             f['update_time'] = value['update_time']
             f['cdn_url'] = value['cdn_url']
             self.file_list[f['file_id']] = f
+
+
+class WechatDevSettingPage(WechatCGIDataPage):
+    """docstring for WechatDevSettingPage"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN"
+        self.url = "%s&token=%s" % (self.base_url, request_token)
+        super(WechatDevSettingPage, self).__init__(self.url)
+        self.request_token = request_token
+
+        self.operation_seq = None
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=%s" % self.request_token
+        return headers
+
+    def _on_open_url_after(self):
+        super(WechatDevSettingPage, self)._on_open_url_after()
+        if not self.cgi_data : return
+        self.operation_seq = self.cgi_data.get('operation_seq')
+
+    def modify_server_setting(self, server_url, callback_token):
+        if not server_url or not callback_token : return
+        modify_server_setting_request = WechatDevServerSettingRequest(self.request_token, self.operation_seq)
+        modify_server_setting_request.modify_setting(server_url, callback_token)
+
+        print modify_server_setting_request.response_json

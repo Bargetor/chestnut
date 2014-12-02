@@ -9,7 +9,7 @@ import MultipartPostHandler
 
 from bargetor.common.web.WebPage import WebPage
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
-from bargetor.common import HTMLUtil, ReUtil
+from bargetor.common import HTMLUtil, ReUtil, StringUtil
 from bargetor.common.JsonUtil import JsonObject
 
 import logging
@@ -204,4 +204,39 @@ class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
         self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
         super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
+
+class WechatDevServerSettingRequest(WechatRequest):
+    """docstring for WechatDevSettingRequest"""
+    def __init__(self, request_token, operation_seq):
+        self.base_url = "https://mp.weixin.qq.com/advanced/callbackprofile?t=ajax-response&lang=zh_CN"
+        self.url = "%s&token=%s" % (self.base_url, request_token)
+        super(WechatDevServerSettingRequest, self).__init__(self.url)
+        self.request_token = request_token
+        self.operation_seq = operation_seq
+
+        self.server_url = None
+        self.callback_token = None
+        self.callback_encrypt_mode = "0"
+        self.encoding_aeskey = StringUtil.get_random_str(43)
+
+    def modify_setting(self, server_url, callback_token):
+        if not server_url or not callback_token : return
+        self.server_url = server_url
+        self.callback_token = callback_token
+
+        self.open()
+
+    def _build_params(self):
+        params = dict()
+        params['url'] = self.server_url
+        params['callback_token'] = self.callback_token
+        params['encoding_aeskey'] = self.encoding_aeskey
+        params['callback_encrypt_mode'] = self.callback_encrypt_mode
+        params['operation_seq'] = self.operation_seq
+        return params
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=%s" % self.request_token
+        return headers
 
