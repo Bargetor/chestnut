@@ -48,5 +48,5 @@ class WechatCenter(object):
         if not wechat: return
         wechat.wechat_login()
         wechat.request_user_setting_page()
-        # wechat.request_wechat_follower_page()
+        wechat.request_wechat_follower_page()
         wechat.request_wechat_image_page()

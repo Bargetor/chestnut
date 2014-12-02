@@ -27,9 +27,8 @@ class WechatRequest(WebPage):
         self.response_ret = 99999999
         self.response_msg = None
 
-    def open(self, is_need_cookes = False):
-        super(WechatRequest, self).open(is_need_cookes)
-
+    def _on_open_url_after(self):
+        super(WechatRequest, self)._on_open_url_after()
         self.response_json = json.loads(self.content)
         if not self.response_json : return
         self.response_ret = self.response_json['base_resp']['ret']
@@ -39,6 +38,7 @@ class WechatLoginRequest(WechatRequest):
     def __init__(self, username = None, password = None):
         self.url = 'https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN'
         super(WechatLoginRequest, self).__init__(self.url)
+        self.is_need_cookes = True
 
         self.username = username
         self.password = password
@@ -48,29 +48,24 @@ class WechatLoginRequest(WechatRequest):
         self.setting_page = None
         self.follower_page = None
 
-    def __build_home_page_header(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Accept-Encoding'] = 'gzip,deflate,sdch'
-        headers['Content-Length'] = '79'
         headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/loginpage?t=wxm2-login&lang=zh_CN'
-        self.headers = headers
         return headers
 
-    def __build_request_param(self):
-        paras = {'username':self.username, 'pwd':self.password, 'imgcode':'', 'f':'json'}
-        self.params = paras
-        return paras
+    def _build_params(self):
+        params = {'username':self.username, 'pwd':self.password, 'imgcode':'', 'f':'json'}
+        return params
 
     def login(self):
-
         if not self.username or not self.password: return
-
-        self.__build_request_param()
-        self.__build_home_page_header()
-
-        self.open(True)
-        self.__find_token()
+        self.open()
         return self.request_token
+
+    def _on_open_url_after(self):
+        super(WechatLoginRequest, self)._on_open_url_after()
+        self.__find_token()
 
     def __find_token(self):
         self.login_ret = self.response_ret
@@ -90,27 +85,26 @@ class WechatGetFollowerInfoRequest(WechatRequest):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=%s" % to_fake_id
         super(WechatGetFollowerInfoRequest, self).__init__(self.base_url)
         self.request_token = request_token
-
         self.follower_info = None
 
-    def __build_get_follower_info_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=10&pageidx=0&type=0&token=%s&lang=zh_CN" % self.request_token
         return headers
 
-    def __build_get_follower_info_params(self):
+    def _build_params(self):
         params = build_wechat_base_request_params()
         params['token'] = self.request_token
         params['json'] = '1'
         return params
 
     def get_info(self):
-        self.headers = self.__build_get_follower_info_headers()
-        self.params = self.__build_get_follower_info_params()
-
         self.open()
-        self.follower_info = self.__process_response_info(self.content)
         return self.follower_info
+
+    def _on_open_url_after(self):
+        super(WechatGetFollowerInfoRequest, self)._on_open_url_after()
+        self.follower_info = self.__process_response_info(self.content)
 
     def __process_response_info(self, response_info):
         if not self.response_json : return None
@@ -142,17 +136,14 @@ class WechatSingleSendRequest(WechatRequest):
         self.to_fake_id = to_fake_id
 
     def send(self):
-        self.headers = self._build_send_request_headers()
-        self.params = self._build_send_request_params()
-
         self.open()
 
-    def _build_send_request_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = "%s&token=%s&tofakeid=%s" % (self.base_referer_url, self.request_token, self.to_fake_id)
         return headers
 
-    def _build_send_request_params(self):
+    def _build_params(self):
         params = build_wechat_base_request_params()
         params['token'] = self.request_token
         params['ajax'] = "1"
@@ -164,8 +155,8 @@ class WechatSingleSendTextRequest(WechatSingleSendRequest):
     def __init__(self, request_token, to_fake_id):
         super(WechatSingleSendTextRequest, self).__init__(request_token, to_fake_id)
 
-    def _build_send_request_params(self):
-        params = super(WechatSingleSendTextRequest, self)._build_send_request_params()
+    def _build_params(self):
+        params = super(WechatSingleSendTextRequest, self)._build_params()
         params['type'] = "1"
         params['content'] = "该消息来自伟大的chestnut!"
         return params
@@ -174,6 +165,7 @@ class WechatMaterialUploadRequest(WechatRequest):
     """docstring for WechatMaterialUploadRequest"""
     def __init__(self, request_token, user_name, ticket):
         super(WechatMaterialUploadRequest, self).__init__(self.url)
+        self.is_multipart_post = True
         self.request_token = request_token
         self.user_name = user_name
         self.ticket = ticket
@@ -184,24 +176,15 @@ class WechatMaterialUploadRequest(WechatRequest):
 
         if not file_name : return
         if not os.path.exists(file_name) : return
-
         self.file_name = file_name
-        self.params = self.__build_file_upload_params()
-        self.headers = self.__build_file_upload_headers()
-        cookies = cookielib.CookieJar()
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),MultipartPostHandler.MultipartPostHandler)
-        urllib2.install_opener(opener)
 
         self.open()
 
-    def _build_request(self):
-        print 'upload request'
-        if self.url is None : return None
-        if self.params :
-            return urllib2.Request(str(self.url), self.params)
-        return urllib2.Request(self.url)
+    def _set_params(self, request, params):
+        if request is None or params is None: return
+        request.add_data(params)
 
-    def __build_file_upload_params(self):
+    def _build_params(self):
         params = dict()
         file_name = os.path.basename(self.file_name)
         params['Filename'] = file_name
@@ -210,7 +193,7 @@ class WechatMaterialUploadRequest(WechatRequest):
         params['file'] = open(self.file_name, 'rb')
         return params
 
-    def __build_file_upload_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN&token=%s" % self.request_token
         return headers

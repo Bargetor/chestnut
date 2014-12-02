@@ -31,18 +31,17 @@ class Wechat(object):
 
     def request_user_setting_page(self):
         self.setting_page = WechatSettingPage(self.request_token)
+        self.setting_page.open()
         return self.setting_page
 
     def request_wechat_follower_page(self):
         self.follower_page = WechatFollowerPage(self.request_token)
+        self.follower_page.find_all_followers()
         return self.follower_page
 
     def request_wechat_image_page(self):
         self.image_page = WecahtImageMaterialPage(self.request_token)
         self.image_page.open()
-        print self.image_page.request_token
-        print self.image_page.user_name
-        print self.image_page.ticket
 
         self.image_page.upload('/Users/Bargetor/Documents/temp/user.png')
 

@@ -17,19 +17,17 @@ log = logging.getLogger(__name__)
 
 class WechatCGIDataPage(WebPage):
     """docstring for WechatRequest"""
-    def __init__(self, url, params = None, headers = None):
+    def __init__(self, url):
         super(WechatCGIDataPage, self).__init__(url)
-
         self.cgi_data = None
 
-    def open(self, is_need_cookes = False):
-        super(WechatCGIDataPage, self).open(is_need_cookes)
-
+    def _on_open_url_after(self):
         self.cgi_data = self._process_cgi_data()
 
     def _process_cgi_data(self):
         js = self._find_cgi_data_javascript()
         js = self._format_cgi_data_javascript(js)
+        if not js : return None
         cgi_data_json = self.exe_js_not_in_content(js)
         if cgi_data_json:
             cgi_data_json = cgi_data_json.replace('\t', '')
@@ -54,15 +52,18 @@ class WechatFollowerPage(WechatCGIDataPage):
         self.request_token = request_token
         self.follower_info = self.WechatFollowerInfo()
 
+    def find_all_followers(self):
         self.__build_follower_info()
 
-        # follower = self.follower_info.followers.get('1159047001')
+        print self.follower_info.followers
 
-        # send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
-        # send_text_request.send()
+        follower = self.follower_info.followers.get('1159047001')
 
-        # get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
-        # print get_follower_info_reqeust.get_info()
+        send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
+        send_text_request.send()
+
+        get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
+        print get_follower_info_reqeust.get_info()
 
     def __build_follower_info(self):
         self.__process_follower_page(0)
@@ -82,10 +83,9 @@ class WechatFollowerPage(WechatCGIDataPage):
         if not self.request_token: return
         self.url = "%s&pagesize=%s&pageidx=%s" % (self.base_url, str(follower_page_size), str(follower_page_index))
 
-        self.headers = self.__build_follower_page_reqeust_headers()
         self.open()
 
-    def __build_follower_page_reqeust_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
         return headers
@@ -139,14 +139,13 @@ class WechatFollowerPage(WechatCGIDataPage):
 class WechatSettingPage(WebPage):
     """docstring for WechatSettingPage"""
     def __init__(self, request_token):
-        self.url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=" +request_token
+        self.url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=%s" % request_token
         super(WechatSettingPage, self).__init__(self.url)
 
         self.request_token = request_token
 
-        self.__request_user_setting_page()
+    def _on_open_url_after(self):
         self.dom = HTMLUtil.build_html_dom_from_str(self.content)
-
         self.account_info = self.AccountInfo()
         self.__init_account_info()
 
@@ -155,13 +154,7 @@ class WechatSettingPage(WebPage):
         log.info(self.account_info)
 
 
-    def __request_user_setting_page(self):
-        if not self.request_token: return
-
-        self.headers = self.__build_setting_page_request_headers()
-        self.open()
-
-    def __build_setting_page_request_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
         return headers
@@ -170,47 +163,41 @@ class WechatSettingPage(WebPage):
         if not self.dom: return
         account_info_element_list = HTMLUtil.find_html_element_list_for_tag(self.dom, 'li', 'account_setting_item')
         for element in account_info_element_list:
-            account_info_item = self.__parse_account_info_item(element)
-            self.__confirm_account_info(account_info_item)
+            name, content = self.__parse_account_info_item(element)
+            self.__confirm_account_info(name, content)
 
     def __parse_account_info_item(self, element):
-        item = {}
         name_element = HTMLUtil.find_html_element_list_for_tag(element, 'h4')[0]
         if not name_element: return item
         name = HTMLUtil.find_element_content(name_element)
         content_element = HTMLUtil.find_html_element_list_for_tag(element, 'div', 'meta_content')[0]
         if not content_element: return item
         content = HTMLUtil.find_element_content(content_element)
-        item['name'] = name
-        item['content'] = content
-        return item
+        return name, content
 
-    def __confirm_account_info(self, account_info_item):
-        name = account_info_item['name']
-        content = account_info_item['content']
-
+    def __confirm_account_info(self, name, content):
         if not name: return
-        if name == '名称':
+        if name == u'名称':
             self.account_info.name = content
-        if name == '头像':
+        if name == u'头像':
             self.account_info.pic = content
-        if name == '登录邮箱':
+        if name == u'登录邮箱':
             self.account_info.account_name = content
-        if name == '原始ID':
+        if name == u'原始ID':
             self.account_info.wechat_default_id = content
-        if name == '微信号':
+        if name == u'微信号':
             self.account_info.wechat_id = content
-        if name == '类型':
+        if name == u'类型':
             self.account_info.wechat_type = content
-        if name == '认证情况':
+        if name == u'认证情况':
             self.account_info.is_authenticate = content
-        if name == '主体信息':
+        if name == u'主体信息':
             self.account_info.owner_info = content
-        if name == '介绍':
+        if name == u'介绍':
             self.account_info.description = content
-        if name == '所在地址':
+        if name == u'所在地址':
             self.account_info.address = content
-        if name == '二维码':
+        if name == u'二维码':
             self.account_info.qs_code = content
 
     class AccountInfo(object):
@@ -255,12 +242,11 @@ class WechatMaterialPage(WechatCGIDataPage):
         self.nick_name = None
 
     def open(self):
-        self.headers = self.__build_material_reqeust_headers()
 
         super(WechatMaterialPage, self).open()
         self._process_material_params()
 
-    def __build_material_reqeust_headers(self):
+    def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&t=media/appmsg_list&type=10&action=list&lang=zh_CN&token=%s" % self.request_token
         return headers
@@ -299,9 +285,8 @@ class WecahtImageMaterialPage(WechatMaterialPage):
         self.file_count = 0
         self.file_list = dict()
 
-    def open(self):
-        super(WecahtImageMaterialPage, self).open()
-
+    def _on_open_url_after(self):
+        super(WecahtImageMaterialPage, self)._on_open_url_after()
         self.__build_file_data()
 
     def upload(self, file_name):

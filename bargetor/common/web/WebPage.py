@@ -11,6 +11,8 @@ import json
 import hashlib
 import xml.etree.ElementTree as ET
 
+from bargetor.common import ArrayUtil
+
 class WebPage(object):
     """docstring for WebPage"""
     def __init__(self, url, params = None, headers = None):
@@ -19,34 +21,74 @@ class WebPage(object):
         self.params = params
         self.headers = headers
 
+        self.is_need_cookes = False
+        self.is_multipart_post = False
+
         self.content = None
 
-    def open(self, is_need_cookes = False):
-        if is_need_cookes:
-            cj = cookielib.LWPCookieJar()
-            opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-            urllib2.install_opener(opener)
+    def open(self):
+        headers = ArrayUtil.merged_dict(self.headers, self._build_headers())
+        params = ArrayUtil.merged_dict(self.params, self._build_params())
+
+        opener = self._build_opener()
+        self.__install_opener(opener)
 
         request = self._build_request()
+
         if not request : return
-        self.__set_headers(request)
+        self._set_headers(request, headers)
+        self._set_params(request, params)
+
+        self._on_open_url_before()
         ret = urllib2.urlopen(request)
         self.content = ret.read()
         ret.close()
+        self._on_open_url_after()
 
+    def _build_headers(self):
+        return None
+
+    def _build_params(self):
+        return None
+
+    def _build_opener(self):
+        handlers = []
+
+        if self.is_need_cookes :
+            cj = cookielib.LWPCookieJar()
+            cookes_handler = urllib2.HTTPCookieProcessor(cj)
+            handlers.append(cookes_handler)
+
+        if self.is_multipart_post :
+            handlers.append(MultipartPostHandler.MultipartPostHandler)
+
+        if len(handlers) > 0 :
+            return urllib2.build_opener(*handlers)
+        return None
+
+    def __install_opener(self, opener):
+        if not opener : return
+        urllib2.install_opener(opener)
 
     def _build_request(self):
         if self.url is None : return None
-        if self.params :
-            # 如果不把 url 转化成 str 类型 那么在 httplib 827 行就会出现编码错误
-            return urllib2.Request(str(self.url), urllib.urlencode(self.params))
-        return urllib2.Request(self.url)
+        return urllib2.Request(str(self.url))
 
 
-    def __set_headers(self, request):
-        if request is None or self.headers is None: return
-        for key,value in self.headers.items():
+    def _set_headers(self, request, headers):
+        if request is None or headers is None: return
+        for key,value in headers.items():
             request.add_header(key, value)
+
+    def _set_params(self, request, params):
+        if request is None or params is None: return
+        request.add_data(urllib.urlencode(params))
+
+    def _on_open_url_before(self):
+        pass
+
+    def _on_open_url_after(self):
+        pass
 
     def exe_js_not_in_content(self, js_str):
         if not js_str : return None
@@ -59,30 +101,7 @@ class WebPage(object):
         browser.close()
         return result
 
-class WebUpLoadRequest(WebPage):
-    """docstring for WebUpLoadRequest"""
-    def __init__(self, url, params = None, headers = None):
-        super(WebUpLoadRequest, self).__init__(url, params, headers)
 
-        self.file_param_name = None
-        slef.file_name = None
-
-    def upload(self, file_param_name, file_name):
-        self.file_param_name = file_param_name
-        self.file_name = file_name
-
-        self.__build_file_upload_params()
-        cookies = cookielib.CookieJar()
-        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookies),MultipartPostHandler.MultipartPostHandler)
-        urllib2.install_opener(opener)
-
-        self.open()
-
-    def __build_file_upload_params(self):
-        if self.params is None:
-            self.params = dict()
-        if self.file_param_name is None : return
-        self.params[self.file_param_name] = open(self.file_name, 'rb')
 
 driver_class_list = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox, webdriver.Safari,]
 
