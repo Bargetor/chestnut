@@ -48,9 +48,14 @@ class Wechat(object):
         self.image_page.upload('/Users/Bargetor/Documents/temp/user.png')
 
     def request_create_app_msg(self):
-        app_msgs_create_request = WechatAppMsgProcessRequest(self.request_token)
-        app_msgs_create_request.add_app_msg_item_by_info('测试', '<p>哈哈</p>', '201079878')
-        app_msgs_create_request.create()
+        # app_msgs_create_request = WechatAppMsgProcessRequest(self.request_token)
+        # app_msgs_create_request.add_app_msg_item_by_info('测试', '<p>哈哈</p>', '201079878')
+        # app_msgs_create_request.create()
+
+        request = WechatAppMsgCreateRequest(self.request_token)
+        app_msg = WechatAppMsg()
+        app_msg.add_app_msg_item_by_info('正式创建', '<p>哈哈</p>', '201079878')
+        request.create(app_msg)
 
     def request_get_app_msgs_list(self):
         request = WechatGetAppMsgListRequest(self.request_token)

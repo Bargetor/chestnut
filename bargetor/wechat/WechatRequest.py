@@ -251,9 +251,6 @@ class WechatGetAppMsgListRequest(WechatRequest):
         app_msg.app_msg_id = app_msg_info.get('app_id')
         app_msg.create_time = long(app_msg_info.get('create_time'))
         app_msg.update_time = long(app_msg_info.get('update_time'))
-        print app_msg.app_msg_id
-        print app_msg.create_time
-        print app_msg.update_time
         app_msg.items = self.__build_app_msg_items(app_msg_info)
         return app_msg
 
@@ -364,6 +361,60 @@ class WechatAppMsgProcessRequest(WechatRequest):
 
         params['count'] = str(len(app_msg_items))
         return ArrayUtil.merged_dict(base_params, params)
+
+class WechatAppMsgCreateRequest(WechatRequest):
+    """docstring for WechatAppMsgCreateRequest
+    由于微信在创建图文信息时没有返回图文ID，故这个类是一个讨巧方式的存在
+    先以标题为一随机数创建，再取图文列表，找到该随机数，再修改"""
+    def __init__(self, request_token):
+        super(WechatAppMsgCreateRequest, self).__init__(None)
+
+        self.request_token = request_token
+        self.process = WechatAppMsgProcessRequest(request_token)
+        self.random_title = StringUtil.get_random_str()
+        self.app_msg_id = None
+
+    def __build_random_app_msg(self):
+        random_app_msg = WechatAppMsg()
+        random_app_msg.add_app_msg_item_by_info(self.random_title, self.random_title, '201079878')
+        return random_app_msg
+
+    def create(self, app_msg):
+        if not app_msg : return
+        random_app_msg = self.__build_random_app_msg()
+        self.process.app_msg = random_app_msg
+        self.process.create()
+
+        print self.process.response_json
+
+        request = WechatGetAppMsgListRequest(self.request_token)
+        request.open()
+        app_msgs = request.app_msgs
+
+        random_title_app_msg = self.__find_random_title_app_msg(app_msgs)
+        if not random_title_app_msg : return
+        app_msg.app_msg_id = random_title_app_msg.app_msg_id
+        self.process.app_msg = app_msg
+        self.process.update()
+
+        self.app_msg_id = random_title_app_msg.app_msg_id
+
+        print self.app_msg_id
+
+    def open(self):
+        # open重写不可用
+        return
+
+    def __find_random_title_app_msg(self, app_msgs):
+        if not app_msgs : return None
+        if not isinstance(app_msgs, list) : return None
+        for app_msg in app_msgs:
+            base_item = app_msg.items[0]
+            if base_item.title == self.random_title :
+                return app_msg
+        return None
+
+
 
 
 
