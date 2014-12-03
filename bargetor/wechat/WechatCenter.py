@@ -47,8 +47,12 @@ class WechatCenter(object):
     def __refresh_wechat(self, wechat):
         if not wechat: return
         wechat.wechat_login()
-        # wechat.request_user_setting_page()
+        wechat.request_user_setting_page()
         # wechat.request_wechat_follower_page()
         # wechat.request_wechat_image_page()
-        wechat.request_wechat_dev_setting_page()
+        # wechat.request_wechat_dev_setting_page()
+        wechat.request_create_app_msg()
+        app_msgs = wechat.request_get_app_msgs_list()
+        wechat.request_update_app_msg(app_msgs[0])
+
 

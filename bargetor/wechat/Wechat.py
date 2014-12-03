@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from bargetor.wechat.WechatPage import *
 from bargetor.wechat.WechatRequest import *
 
@@ -45,6 +46,23 @@ class Wechat(object):
         self.image_page.open()
 
         self.image_page.upload('/Users/Bargetor/Documents/temp/user.png')
+
+    def request_create_app_msg(self):
+        app_msgs_create_request = WechatAppMsgProcessRequest(self.request_token)
+        app_msgs_create_request.add_app_msg_item_by_info('测试', '<p>哈哈</p>', '201079878')
+        app_msgs_create_request.create()
+
+    def request_get_app_msgs_list(self):
+        request = WechatGetAppMsgListRequest(self.request_token)
+        request.open()
+        return request.app_msgs
+
+    def request_update_app_msg(self, app_msg):
+        app_msg.remove_all_items()
+        app_msg.add_app_msg_item_by_info('修改', '<p>修改</p>', '201079878')
+        request = WechatAppMsgProcessRequest(self.request_token)
+        request.app_msg = app_msg
+        request.update()
 
     def request_wechat_dev_setting_page(self):
         self.dev_setting_page = WechatDevSettingPage(self.request_token)

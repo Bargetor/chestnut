@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 import json
+import time
 import random
 import os
 import urllib
@@ -9,7 +10,8 @@ import MultipartPostHandler
 
 from bargetor.common.web.WebPage import WebPage
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
-from bargetor.common import HTMLUtil, ReUtil, StringUtil
+from bargetor.wechat.WechatModel import *
+from bargetor.common import HTMLUtil, ReUtil, StringUtil, ArrayUtil
 from bargetor.common.JsonUtil import JsonObject
 
 import logging
@@ -31,8 +33,14 @@ class WechatRequest(WebPage):
         super(WechatRequest, self)._on_open_url_after()
         self.response_json = json.loads(self.content)
         if not self.response_json : return
-        self.response_ret = self.response_json['base_resp']['ret']
-        self.response_msg = self.response_json['base_resp']['err_msg']
+        if self.response_json.get('base_resp'):
+            self.response_ret = self.response_json.get('base_resp').get('ret')
+            self.response_msg = self.response_json.get('base_resp').get('err_msg')
+            return
+        if self.response_json.get('msg') and self.response_json.get('ret'):
+            self.response_msg = self.response_json.get('msg')
+            self.response_ret = self.response_json.get('ret')
+            return
 
 class WechatLoginRequest(WechatRequest):
     def __init__(self, username = None, password = None):
@@ -204,6 +212,160 @@ class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
         self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
         super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
+
+class WechatGetAppMsgListRequest(WechatRequest):
+    """docstring for WechatGetPhotoNewsListRequest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?type=10&action=list&begin=0&count=10&f=json&lang=zh_CN&lang=zh_CN&f=json&ajax=1"
+        self.url = "%s&token=%s&random=%s" % (self.base_url, request_token, str(random.random()))
+        super(WechatGetAppMsgListRequest, self).__init__(self.url)
+        self.request_token = request_token
+
+        self.app_msgs = []
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN&token=%s" % self.request_token
+        return headers
+
+    def _on_open_url_after(self):
+        super(WechatGetAppMsgListRequest, self)._on_open_url_after()
+        self.__process_app_msg_info()
+
+    def __process_app_msg_info(self):
+        if not self.response_json : return
+        app_msg_info = self.response_json.get('app_msg_info')
+        if not app_msg_info : return
+        self.app_msgs = self.__build_app_msgs(app_msg_info)
+
+    def __build_app_msgs(self, app_msg_info):
+        app_msgs = []
+        item = app_msg_info.get('item')
+        if not item : return app_msgs
+        for info in item:
+            app_msgs.append(self.__build_app_msg(info))
+        return app_msgs
+
+    def __build_app_msg(self, app_msg_info):
+        app_msg = WechatAppMsg()
+        app_msg.app_msg_id = app_msg_info.get('app_id')
+        app_msg.create_time = long(app_msg_info.get('create_time'))
+        app_msg.update_time = long(app_msg_info.get('update_time'))
+        print app_msg.app_msg_id
+        print app_msg.create_time
+        print app_msg.update_time
+        app_msg.items = self.__build_app_msg_items(app_msg_info)
+        return app_msg
+
+    def __build_app_msg_items(self, app_msg_info):
+        items = []
+        multi_items = app_msg_info.get('multi_item')
+        if not multi_items : return items
+        for item in multi_items:
+            app_msg_item = WechatAppMsgItem()
+            app_msg_item.title = item.get('title')
+            app_msg_item.show_cover_pic = item.get('show_cover_pic')
+            app_msg_item.author = item.get('author')
+            app_msg_item.content_url = item.get('content_url')
+            app_msg_item.img_url = item.get('cover')
+            app_msg_item.source_url = item.get('source_url')
+            app_msg_item.file_id = item.get('file_id')
+            app_msg_item.digest = item.get('digest')
+            app_msg_item.seq = item.get('seq')
+
+            items.append(app_msg_item)
+        return items
+
+
+
+
+class WechatAppMsgProcessRequest(WechatRequest):
+    """docstring for WechatPhotoNewsAddRequest, for wechat app msg create or update"""
+    CREATE_METHOD = 'create'
+    UPDATE_METHOD = 'update'
+
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?t=ajax-response&type=10&lang=zh_CN&token=" + request_token
+        self.url = self.base_url
+        super(WechatAppMsgProcessRequest, self).__init__(self.url)
+        self.request_token = request_token
+
+        self.app_msg = WechatAppMsg()
+        # 你问我这里为什么要记录发送和响应时间？我只能告诉你，狗日的微信没有返回图文ID，奶奶的腿
+        self.request_send_time = 9999999999
+        self.request_response_time = -1
+
+    def add_app_msg_item_by_info(self, title, content, file_id, author = None, source_url = None):
+        self.app_msg.add_app_msg_item_by_info(title, content, file_id, author, source_url)
+
+    def add_app_msg_item(self, app_msg_item):
+        self.app_msg.add_app_msg_item(app_msg_item)
+
+    def add_app_msg_items(self, app_msg_items):
+        self.app_msg.add_app_msg_items(app_msg_items)
+
+    def remove_item_by_index(self, index):
+        self.app_msg.remove_item_by_index(index)
+
+    def remove_item_by_seq(self, seq):
+        self.app_msg.remove_item_by_seq(seq)
+
+    def remove_all_items(self):
+        self.app_msg.remove_all_items()
+
+    def create(self, app_msg_items = None):
+        if app_msg_items :
+            self.add_app_msg_items(app_msg_items)
+        self.url = self.base_url + "&sub=%s" % self.CREATE_METHOD
+
+        self.open()
+
+    def update(self):
+        self.url = self.base_url + "&sub=%s" % self.UPDATE_METHOD
+
+        self.open()
+
+    def _on_open_url_before(self):
+        self.request_send_time = long(time.time())
+
+    def _on_open_url_after(self):
+        self.request_response_time = long(time.time())
+        super(WechatAppMsgProcessRequest, self)._on_open_url_after()
+
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=10&isMul=1&isNew=1&lang=zh_CN&token=%s" % self.request_token
+        return headers
+
+    def _build_params(self):
+        params = build_wechat_base_request_params()
+        params['ajax'] = '1'
+        params['token'] = self.request_token
+        params['AppMsgId'] = self.app_msg.app_msg_id
+        params['vid'] = ''
+        params = self.__build_app_msg_process_params(params, self.app_msg.items)
+        return params
+
+    def __build_app_msg_process_params(self, base_params, app_msg_items):
+        params = dict()
+        if not app_msg_items : return base_params
+        for i in xrange(len(app_msg_items)):
+            app_msg_item = app_msg_items[i]
+            if not app_msg_item.title or not app_msg_item.content or not app_msg_item.file_id : continue
+
+            params['title' + str(i)] = app_msg_item.title
+            params['content' + str(i)] = app_msg_item.content
+            params['digest' + str(i)] = app_msg_item.digest
+            params['author' + str(i)] = app_msg_item.author
+            params['fileid' + str(i)] = app_msg_item.file_id
+            params['show_cover_pic' + str(i)] = app_msg_item.show_cover_pic
+            params['source_url' + str(i)] = app_msg_item.source_url
+
+        params['count'] = str(len(app_msg_items))
+        return ArrayUtil.merged_dict(base_params, params)
+
+
 
 class WechatDevServerSettingRequest(WechatRequest):
     """docstring for WechatDevSettingRequest"""
