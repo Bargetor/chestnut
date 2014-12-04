@@ -169,6 +169,24 @@ class WechatSingleSendTextRequest(WechatSingleSendRequest):
         params['content'] = "该消息来自伟大的chestnut!"
         return params
 
+class WechatSingleSendAppMsgRequest(WechatSingleSendRequest):
+    def __init__(self, request_token, to_fake_id):
+        super(WechatSingleSendAppMsgRequest, self).__init__(request_token, to_fake_id)
+
+        self.app_msg_id = None
+
+    def send(self, app_msg_id):
+        if not app_msg_id : return
+        self.app_msg_id = app_msg_id
+        self.open()
+
+    def _build_params(self):
+        params = super(WechatSingleSendAppMsgRequest, self)._build_params()
+        params['type'] = "10"
+        params['app_id'] = self.app_msg_id
+        params['appmsgid'] = self.app_msg_id
+        return params
+
 class WechatMaterialUploadRequest(WechatRequest):
     """docstring for WechatMaterialUploadRequest"""
     def __init__(self, request_token, user_name, ticket):

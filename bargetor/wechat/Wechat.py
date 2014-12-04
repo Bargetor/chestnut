@@ -57,6 +57,9 @@ class Wechat(object):
         app_msg.add_app_msg_item_by_info('正式创建', '<p>哈哈</p>', '201079878')
         request.create(app_msg)
 
+        send_reqeust = WechatSingleSendAppMsgRequest(self.request_token, '1159047001')
+        send_reqeust.send(request.app_msg_id)
+
     def request_get_app_msgs_list(self):
         request = WechatGetAppMsgListRequest(self.request_token)
         request.open()
