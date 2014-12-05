@@ -12,7 +12,15 @@
         <script type="text/javascript" src="{{STATIC_URL}}js/chestnut-request.js"></script>
 
         <script type="text/javascript" src="{{STATIC_URL}}js/angular-home.js"></script>
+        <script type="text/javascript">
+            function get_wechat_info(){
+                var username, password;
+                username = document.getElementById('wechat_username').value;
+                password = document.getElementById("wechat_password").value;
+                get_wechat_user_info(username, password, get_wechat_user_info_callback);
+            }
 
+        </script>
     </head>
     <body>
         {{ response_str }}
@@ -22,13 +30,13 @@
             <input name="password" type="password" placeholder="password"/>
             <input type="submit" value="登录"/>
         </form>
-        <input type="button" value="获取微信公众号信息" onclick="get_wechat_user_info('bargetor_public@sina.com', 'lanqiao@mj', get_wechat_user_info_callback);">
+        <input type="button" value="获取微信公众号信息" onclick="get_wechat_info()">
 
         <form method="post" action="{% url 'account:signup'%}">
             {% csrf_token %}
             <[your_name]>
-            <input name="wechat_username" type="text" value="bargetor_public@sina.com" placeholder="请输入微信公众帐号"/>
-            <input name="wechat_password" type="password" value="lanqiao@mj" placeholder="请输入微信公众帐号密码"/>
+            <input name="wechat_username" id="wechat_username" type="text" value="bargetor_public@sina.com" placeholder="请输入微信公众帐号"/>
+            <input name="wechat_password" id="wechat_password" type="password" value="lanqiao@mj" placeholder="请输入微信公众帐号密码"/>
             <input name="wechat_default_id" type="text" id="wechat_default_id"/>
             <input type="text" ng-model="your_name"/>
             <input type="submit" value="注册"/>

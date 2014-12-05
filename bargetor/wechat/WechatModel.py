@@ -6,12 +6,13 @@ class WechatAppMsg(object):
         self.update_time = -1
         self.items = []
 
-    def add_app_msg_item_by_info(self, title, content, file_id, author = None, source_url = None):
+    def add_app_msg_item_by_info(self, title, content, file_id, digest = None, author = None, source_url = None):
         if not title or not content or not file_id : return
         app_msg_item = WechatAppMsgItem()
         app_msg_item.title = title
         app_msg_item.content = content
         app_msg_item.file_id = file_id
+        app_msg_item.digest = digest
         app_msg_item.author = author
         app_msg_item.source_url = source_url
         self.add_app_msg_item(app_msg_item)

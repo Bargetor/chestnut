@@ -54,16 +54,15 @@ class WechatFollowerPage(WechatCGIDataPage):
 
     def find_all_followers(self):
         self.__build_follower_info()
+        # print self.follower_info.followers
 
-        print self.follower_info.followers
+        # follower = self.follower_info.followers.get('1159047001')
 
-        follower = self.follower_info.followers.get('1159047001')
+        # send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
+        # send_text_request.send('该消息来自伟大的chestnut')
 
-        send_text_request = WechatSingleSendTextRequest(self.request_token, follower['fake_id'])
-        send_text_request.send()
-
-        get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
-        print get_follower_info_reqeust.get_info()
+        # get_follower_info_reqeust = WechatGetFollowerInfoRequest(self.request_token, follower['fake_id'])
+        # print get_follower_info_reqeust.get_info()
 
     def __build_follower_info(self):
         self.__process_follower_page(0)

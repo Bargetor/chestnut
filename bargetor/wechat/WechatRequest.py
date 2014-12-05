@@ -163,10 +163,17 @@ class WechatSingleSendTextRequest(WechatSingleSendRequest):
     def __init__(self, request_token, to_fake_id):
         super(WechatSingleSendTextRequest, self).__init__(request_token, to_fake_id)
 
+        self.content = None
+
+    def send(self, content):
+        if not content : return
+        self.content = content
+        self.open()
+
     def _build_params(self):
         params = super(WechatSingleSendTextRequest, self)._build_params()
         params['type'] = "1"
-        params['content'] = "该消息来自伟大的chestnut!"
+        params['content'] = self.content
         return params
 
 class WechatSingleSendAppMsgRequest(WechatSingleSendRequest):
@@ -230,6 +237,31 @@ class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
         self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
         super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
+
+class WechatGetMaterialListDataRequest(WechatRequest):
+    """docstring for WechatGetMaterialListDataRequest"""
+    def __init__(self, request_token):
+        super(WechatGetMaterialListDataRequest, self).__init__(None)
+        self.request_token = request_token
+
+        self.begin = 0
+        self.count = 10
+        self.total_count = -1
+
+    def get(self):
+        pass
+
+    def _get_data(self):
+        self.url = self._build_url()
+        self.open()
+
+    def _on_open_url_after(self):
+        pass
+
+    def _build_url(self):
+        url = self.base_url + "&begin=%s&count=%s" % (str(self.begin), str(self.count))
+        return url
+
 
 class WechatGetAppMsgListRequest(WechatRequest):
     """docstring for WechatGetPhotoNewsListRequest"""
@@ -360,6 +392,7 @@ class WechatAppMsgProcessRequest(WechatRequest):
         params['AppMsgId'] = self.app_msg.app_msg_id
         params['vid'] = ''
         params = self.__build_app_msg_process_params(params, self.app_msg.items)
+        print params
         return params
 
     def __build_app_msg_process_params(self, base_params, app_msg_items):
@@ -394,7 +427,7 @@ class WechatAppMsgCreateRequest(WechatRequest):
 
     def __build_random_app_msg(self):
         random_app_msg = WechatAppMsg()
-        random_app_msg.add_app_msg_item_by_info(self.random_title, self.random_title, '201079878')
+        random_app_msg.add_app_msg_item_by_info(self.random_title, self.random_title, '203189048')
         return random_app_msg
 
     def create(self, app_msg):

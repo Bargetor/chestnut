@@ -54,11 +54,22 @@ class Wechat(object):
 
         request = WechatAppMsgCreateRequest(self.request_token)
         app_msg = WechatAppMsg()
-        app_msg.add_app_msg_item_by_info('正式创建', '<p>哈哈</p>', '201079878')
+        # app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '200447249')
+        app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '203189048', '打扰，得罪')
         request.create(app_msg)
+        # todo delete
+        # self.request_send_app_msg_all_follower(app_msg.app_msg_id)
 
-        send_reqeust = WechatSingleSendAppMsgRequest(self.request_token, '1159047001')
-        send_reqeust.send(request.app_msg_id)
+    def request_send_app_msg_all_follower(self, app_msg_id):
+        if not app_msg_id : return
+        send_request = WechatSingleSendAppMsgRequest(self.request_token, None)
+        if not self.follower_page : return
+        if not self.follower_page.follower_info : return
+        for follower_id in self.follower_page.follower_info.followers.keys():
+            print follower_id
+            send_request.to_fake_id = follower_id
+            send_request.send(app_msg_id)
+            print send_request.response_json
 
     def request_get_app_msgs_list(self):
         request = WechatGetAppMsgListRequest(self.request_token)
