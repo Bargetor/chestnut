@@ -8,7 +8,7 @@ import urllib2
 import cookielib
 import MultipartPostHandler
 
-from bargetor.common.web.WebPage import WebPage
+from bargetor.common.web.WebRequest import WebRequest
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatModel import *
 from bargetor.common import HTMLUtil, ReUtil, StringUtil, ArrayUtil
@@ -20,7 +20,7 @@ import traceback
 log = logging.getLogger(__name__)
 
 
-class WechatRequest(WebPage):
+class WechatRequest(WebRequest):
     """docstring for WechatRequest"""
     def __init__(self, url, params = None, headers = None):
         super(WechatRequest, self).__init__(url)

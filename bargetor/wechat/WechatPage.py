@@ -2,7 +2,7 @@
 import json
 import re
 import os
-from bargetor.common.web.WebPage import WebPage
+from bargetor.common.web.WebRequest import WebRequest
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatRequest import *
 
@@ -15,7 +15,7 @@ import traceback
 log = logging.getLogger(__name__)
 
 
-class WechatCGIDataPage(WebPage):
+class WechatCGIDataPage(WebRequest):
     """docstring for WechatRequest"""
     def __init__(self, url):
         super(WechatCGIDataPage, self).__init__(url)
@@ -135,7 +135,7 @@ class WechatFollowerPage(WechatCGIDataPage):
             self.followers = dict()
 
 
-class WechatSettingPage(WebPage):
+class WechatSettingPage(WebRequest):
     """docstring for WechatSettingPage"""
     def __init__(self, request_token):
         self.url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=%s" % request_token

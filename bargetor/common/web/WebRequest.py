@@ -13,10 +13,10 @@ import xml.etree.ElementTree as ET
 
 from bargetor.common import ArrayUtil
 
-class WebPage(object):
-    """docstring for WebPage"""
+class WebRequest(object):
+    """docstring for WebRequest"""
     def __init__(self, url, params = None, headers = None):
-        super(WebPage, self).__init__()
+        super(WebRequest, self).__init__()
         self.url = url
         self.params = params
         self.headers = headers
