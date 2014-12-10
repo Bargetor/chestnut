@@ -54,8 +54,8 @@ class Wechat(object):
 
         request = WechatAppMsgCreateRequest(self.request_token)
         app_msg = WechatAppMsg()
-        # app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '200447249')
-        app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '203189048', '打扰，得罪')
+        app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '200447249', '打扰，得罪')
+        # app_msg.add_app_msg_item_by_info('该消息来自伟大的chestnut', '<p>哈哈</p>', '203189048', '打扰，得罪')
         request.create(app_msg)
         # todo delete
         # self.request_send_app_msg_all_follower(app_msg.app_msg_id)
@@ -74,7 +74,7 @@ class Wechat(object):
     def request_get_app_msgs_list(self):
         request = WechatGetAppMsgListRequest(self.request_token)
         request.open()
-        return request.app_msgs
+        return request.list
 
     def request_update_app_msg(self, app_msg):
         app_msg.remove_all_items()
@@ -88,6 +88,10 @@ class Wechat(object):
         self.dev_setting_page.open()
 
         self.dev_setting_page.modify_server_setting('http://www.bargetor.com/chestnut_proxy.php?wechat_user=bargetor_public@sina.com', 'bargetor_chestnut')
+
+    def request_get_wechat_image_list(self):
+        request = WechatGetImageListRequest(self.request_token)
+        request.get()
 
     def is_login(self):
         return self.login_page and self.login_page.is_login()

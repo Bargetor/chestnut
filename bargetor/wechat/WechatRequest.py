@@ -240,38 +240,133 @@ class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
 
 class WechatGetMaterialListDataRequest(WechatRequest):
     """docstring for WechatGetMaterialListDataRequest"""
+    # def __init__(self, request_token):
+    #     super(WechatGetMaterialListDataRequest, self).__init__(None)
+    #     self.request_token = request_token
+
+    #     self.begin = 0
+    #     self.count = 10
+    #     self.total_count = -1
+
+    # def get(self):
+    #     pass
+
+    # def _get_data(self):
+    #     self.url = self._build_url()
+    #     self.open()
+
+    # def _on_open_url_after(self):
+    #     pass
+
+    # def _build_url(self):
+    #     url = self.base_url + "&begin=%s&count=%s" % (str(self.begin), str(self.count))
+    #     return url
     def __init__(self, request_token):
-        super(WechatGetMaterialListDataRequest, self).__init__(None)
+        super(WechatGetMaterialListDataRequest, self).__init__(self.base_url)
         self.request_token = request_token
 
         self.begin = 0
         self.count = 10
         self.total_count = -1
+        self.list = []
 
     def get(self):
-        pass
+        self.__request()
 
-    def _get_data(self):
+        last = self.begin + self.count
+        while  last < self.total_count and self.total_count > 0:
+            self.__request(last)
+            last += self.count
+
+    def __request(self, begin = 0):
+        self.begin = begin
         self.url = self._build_url()
         self.open()
 
+    def _get_data(self):
+        return None
+
+
+    def _get_list_total(self):
+        return -1
+
+
     def _on_open_url_after(self):
-        pass
+        super(WechatGetMaterialListDataRequest, self)._on_open_url_after()
+        self.total_count = self._get_list_total()
+        data = self._get_data()
+        if isinstance(data, list):
+            self.list += data
+
 
     def _build_url(self):
-        url = self.base_url + "&begin=%s&count=%s" % (str(self.begin), str(self.count))
+        url = "%s&token=%s&begin=%s&count=%s" % (self.base_url, self.request_token, str(self.begin), str(self.count))
         return url
 
 
-class WechatGetAppMsgListRequest(WechatRequest):
-    """docstring for WechatGetPhotoNewsListRequest"""
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
+        return headers
+
+
+class WechatGetImageListRequest(WechatGetMaterialListDataRequest):
+    """docstring for WechatGetImageListRequest"""
     def __init__(self, request_token):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?type=10&action=list&begin=0&count=10&f=json&lang=zh_CN&lang=zh_CN&f=json&ajax=1"
-        self.url = "%s&token=%s&random=%s" % (self.base_url, request_token, str(random.random()))
-        super(WechatGetAppMsgListRequest, self).__init__(self.url)
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/filepage?1=1&lang=zh_CN&lang=zh_CN&f=json&ajax=1&random=0.314140283735469&group_id=1&type=2"
+        super(WechatGetImageListRequest, self).__init__(self.base_url)
         self.request_token = request_token
 
-        self.app_msgs = []
+    def _get_data(self):
+        datas = []
+        page_info = self.response_json.get('page_info')
+        if not page_info : return datas
+        datas_json = page_info.get('file_item')
+        if not datas_json : return datas
+        for item in datas_json:
+            img = self.__parse_data_item(item)
+            datas.append(img)
+        return datas
+
+
+    def __parse_data_item(self, item):
+        img = WechatImage()
+        img.file_id = item['file_id']
+        img.file_name = item['name']
+        img.update_time = item['update_time']
+        img.cdn_url = item['cdn_url']
+        return img
+
+
+
+    def _get_list_total(self):
+        page_info = self.response_json.get('page_info')
+        if not page_info : return -1
+        file_cnt = page_info.get('file_cnt')
+        if not file_cnt : return -1
+        img_cnt = file_cnt.get('img_cnt')
+        if not img_cnt : return -1
+        return img_cnt
+
+
+class WechatGetAppMsgListRequest(WechatGetMaterialListDataRequest):
+    """docstring for WechatGetPhotoNewsListRequest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?type=10&action=list&f=json&lang=zh_CN&lang=zh_CN&f=json&ajax=1"
+        super(WechatGetAppMsgListRequest, self).__init__(self.base_url)
+        self.request_token = request_token
+
+    def _get_data(self):
+        return self.__process_app_msg_info()
+
+    def _get_list_total(self):
+        page_info = self.response_json.get('app_msg_info')
+        if not page_info : return -1
+        file_cnt = page_info.get('file_cnt')
+        if not file_cnt : return -1
+        cnt = file_cnt.get('app_msg_cnt')
+        if not cnt : return -1
+        return cnt
 
     def _build_headers(self):
         headers = build_wechat_base_request_headers()
@@ -286,7 +381,8 @@ class WechatGetAppMsgListRequest(WechatRequest):
         if not self.response_json : return
         app_msg_info = self.response_json.get('app_msg_info')
         if not app_msg_info : return
-        self.app_msgs = self.__build_app_msgs(app_msg_info)
+        app_msgs = self.__build_app_msgs(app_msg_info)
+        return app_msgs
 
     def __build_app_msgs(self, app_msg_info):
         app_msgs = []
@@ -407,7 +503,12 @@ class WechatAppMsgProcessRequest(WechatRequest):
             params['digest' + str(i)] = app_msg_item.digest
             params['author' + str(i)] = app_msg_item.author
             params['fileid' + str(i)] = app_msg_item.file_id
-            params['show_cover_pic' + str(i)] = app_msg_item.show_cover_pic
+            show_cover_pic = None
+            if app_msg_item.show_cover_pic :
+                show_cover_pic = '1'
+            else:
+                show_cover_pic = '0'
+            params['show_cover_pic' + str(i)] = show_cover_pic
             params['source_url' + str(i)] = app_msg_item.source_url
 
         params['count'] = str(len(app_msg_items))
@@ -427,7 +528,7 @@ class WechatAppMsgCreateRequest(WechatRequest):
 
     def __build_random_app_msg(self):
         random_app_msg = WechatAppMsg()
-        random_app_msg.add_app_msg_item_by_info(self.random_title, self.random_title, '203189048')
+        random_app_msg.add_app_msg_item_by_info(self.random_title, self.random_title, '200447249')
         return random_app_msg
 
     def create(self, app_msg):
@@ -439,8 +540,8 @@ class WechatAppMsgCreateRequest(WechatRequest):
         print self.process.response_json
 
         request = WechatGetAppMsgListRequest(self.request_token)
-        request.open()
-        app_msgs = request.app_msgs
+        request.get()
+        app_msgs = request.list
 
         random_title_app_msg = self.__find_random_title_app_msg(app_msgs)
         if not random_title_app_msg : return
@@ -461,6 +562,7 @@ class WechatAppMsgCreateRequest(WechatRequest):
         if not isinstance(app_msgs, list) : return None
         for app_msg in app_msgs:
             base_item = app_msg.items[0]
+            print base_item.title
             if base_item.title == self.random_title :
                 return app_msg
         return None

@@ -59,4 +59,12 @@ class WechatAppMsgItem(object):
         self.content_url = None
         self.img_url = None
         self.seq = -1
+class WechatImage(object):
+    """docstring for WechatImage"""
+    def __init__(self):
+        self.file_id = None
+        self.file_name = None
+        self.update_time = None
+        self.cdn_url = None
+        self.size = None
 
