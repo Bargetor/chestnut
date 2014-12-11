@@ -93,6 +93,10 @@ class Wechat(object):
         request = WechatGetImageListRequest(self.request_token)
         request.get()
 
+    def request_get_wechat_ticket(self):
+        request = WechatGetTicketRequest(self.request_token)
+        print request.get_ticket()
+
     def is_login(self):
         return self.login_page and self.login_page.is_login()
 

@@ -8,9 +8,6 @@ def user_info(request):
     username = request.POST.get('username')
     password = request.POST.get('password')
 
-    print username
-    print password
-
     try:
         wechat = WechatCenter().build_wechat(username, password)
     except Exception, e:

@@ -606,3 +606,34 @@ class WechatDevServerSettingRequest(WechatRequest):
         headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=%s" % self.request_token
         return headers
 
+class WechatGetTicketRequest(WechatRequest):
+    """docstring for WechatGetTicketResquest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/misc/safeassistant?1=1&lang=zh_CN"
+        super(WechatGetTicketRequest, self).__init__(self.base_url)
+        self.request_token = request_token
+
+        self.ticket = None
+        self.operation_seq = None
+
+    def get_ticket(self):
+        self.open()
+        return self.ticket
+
+    def _on_open_url_after(self):
+        super(WechatGetTicketRequest, self)._on_open_url_after()
+        self.ticket = self.response_json.get('ticket')
+        self.operation_seq = self.response_json.get('operation_seq')
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN" % self.request_token
+        return headers
+
+    def _build_params(self):
+        params = build_wechat_base_request_params()
+        params['ajax'] = '1'
+        params['action'] = 'get_ticket'
+        params['token'] = self.request_token
+        return params
+
