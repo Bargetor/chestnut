@@ -15,6 +15,8 @@ class Wechat(object):
         self.password = password
         self.request_token = None
 
+        self.ticket = None
+
         self.login_page = None
         self.setting_page = None
         self.follower_page = None
@@ -95,7 +97,12 @@ class Wechat(object):
 
     def request_get_wechat_ticket(self):
         request = WechatGetTicketRequest(self.request_token)
-        print request.get_ticket()
+        self.ticket = request.get_ticket()
+        print self.ticket
+
+    def request_get_wechat_uuid(self):
+        request = WechatGetUUIDRequest(self.request_token)
+        print request.get_uuid(self.ticket)
 
     def is_login(self):
         return self.login_page and self.login_page.is_login()

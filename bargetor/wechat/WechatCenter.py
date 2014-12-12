@@ -56,5 +56,6 @@ class WechatCenter(object):
         # wechat.request_update_app_msg(app_msgs[0])
         # wechat.request_get_wechat_image_list()
         wechat.request_get_wechat_ticket()
+        wechat.request_get_wechat_uuid()
 
 

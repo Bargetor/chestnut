@@ -610,7 +610,8 @@ class WechatGetTicketRequest(WechatRequest):
     """docstring for WechatGetTicketResquest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/misc/safeassistant?1=1&lang=zh_CN"
-        super(WechatGetTicketRequest, self).__init__(self.base_url)
+        self.url = "%s&token=%s" % (self.base_url, request_token)
+        super(WechatGetTicketRequest, self).__init__(self.url)
         self.request_token = request_token
 
         self.ticket = None
@@ -637,3 +638,45 @@ class WechatGetTicketRequest(WechatRequest):
         params['token'] = self.request_token
         return params
 
+class WechatGetUUIDRequest(WechatRequest):
+    """docstring for WechatGetUUIDRequest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/safe/safeqrconnect?1=1&lang=zh_CN"
+        self.url = "%s&token=%s" % (self.base_url, request_token)
+        super(WechatGetUUIDRequest, self).__init__(self.url)
+        self.request_token = request_token
+
+        self.ticket = None
+        self.uuid = None
+        self.app_name = None
+        self.app_desc = None
+
+    def get_uuid(self, ticket):
+        if not ticket : return
+        self.ticket = ticket
+        self.open()
+        return self.uuid
+
+    def _on_open_url_after(self):
+        super(WechatGetUUIDRequest, self)._on_open_url_after()
+        self.uuid = self.response_json.get('uuid')
+        self.app_name = self.response_json.get('appname')
+        self.app_desc = self.response_json.get('appdesc')
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN" % self.request_token
+        return headers
+
+    def _build_params(self):
+        params = build_wechat_base_request_params()
+        params['ajax'] = '1'
+        params['scope'] = 'snsapi_contact'
+        params['state'] = '0'
+        params['appid'] = 'wx3a432d2dbe2442ce'
+        params['ticket'] = self.ticket
+        params['redirect_uri'] = 'https://mp.weixin.qq.com'
+        params['login_type'] = 'safe_center'
+        params['type'] = 'json'
+        params['token'] = self.request_token
+        return params
