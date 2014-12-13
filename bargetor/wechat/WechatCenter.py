@@ -57,5 +57,6 @@ class WechatCenter(object):
         # wechat.request_get_wechat_image_list()
         wechat.request_get_wechat_ticket()
         wechat.request_get_wechat_uuid()
+        wechat.request_download_safe_qrcode()
 
 

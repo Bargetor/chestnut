@@ -8,7 +8,7 @@ import urllib2
 import cookielib
 import MultipartPostHandler
 
-from bargetor.common.web.WebRequest import WebRequest
+from bargetor.common.web.WebRequest import WebRequest, WebDownloadRequest
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatModel import *
 from bargetor.common import HTMLUtil, ReUtil, StringUtil, ArrayUtil
@@ -680,3 +680,28 @@ class WechatGetUUIDRequest(WechatRequest):
         params['type'] = 'json'
         params['token'] = self.request_token
         return params
+
+class WechatDownloadSafeQRCodeRequest(WebDownloadRequest):
+    """docstring for WechatDownloadSafeQRCodeRequest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/safe/safeqrcode?ticket=0bda66c92a0260d4eb9a&uuid=001TrklGU6MRNHwn&action=check&type=msgs&msgid=201255702"
+        super(WechatDownloadSafeQRCodeRequest, self).__init__(self.base_url)
+        self.request_token = request_token
+        self.ext = 'png'
+
+        self.ticket = None
+        self.uuid = None
+        self.msg_id = None
+
+    def download(self, path, file_name = None):
+        if not self.ticket or not self.uuid or not self.msg_id : return
+        if not path : return
+        self.download_path = path
+        if file_name : self.download_file_name = file_name
+        super(WechatDownloadSafeQRCodeRequest, self).open()
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN&token=%s" % self.request_token
+        return headers
+

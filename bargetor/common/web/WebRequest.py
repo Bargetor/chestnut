@@ -2,6 +2,7 @@
 import selenium
 from selenium import webdriver
 import Exescript
+import os
 import json
 import urllib
 import urllib2
@@ -11,7 +12,9 @@ import json
 import hashlib
 import xml.etree.ElementTree as ET
 
-from bargetor.common import ArrayUtil
+from urlparse import urlsplit
+
+from bargetor.common import ArrayUtil, StringUtil
 
 class WebRequest(object):
     """docstring for WebRequest"""
@@ -23,15 +26,18 @@ class WebRequest(object):
 
         self.is_need_cookes = False
         self.is_multipart_post = False
+        self.is_file_down = False
+        self.download_path = None
+        self.download_file_name = None
 
         self.content = None
 
-    def open(self):
+    def _prepare_request(self):
         headers = ArrayUtil.merged_dict(self.headers, self._build_headers())
         params = ArrayUtil.merged_dict(self.params, self._build_params())
 
         opener = self._build_opener()
-        self.__install_opener(opener)
+        self._install_opener(opener)
 
         request = self._build_request()
 
@@ -39,6 +45,10 @@ class WebRequest(object):
         self._set_headers(request, headers)
         self._set_params(request, params)
 
+        return request
+
+    def open(self):
+        request = self._prepare_request()
         self._on_open_url_before()
         ret = urllib2.urlopen(request)
         self.content = ret.read()
@@ -66,7 +76,7 @@ class WebRequest(object):
             return urllib2.build_opener(*handlers)
         return None
 
-    def __install_opener(self, opener):
+    def _install_opener(self, opener):
         if not opener : return
         urllib2.install_opener(opener)
 
@@ -102,6 +112,74 @@ class WebRequest(object):
         return result
 
 
+class WebDownloadRequest(WebRequest):
+    """docstring for WebDownloadRequest"""
+    def __init__(self, url, params = None, headers = None):
+        super(WebDownloadRequest, self).__init__(url, params, headers)
+
+        self.block_sz = 8192
+        self.file_ext = 'tmp'
+
+        self.download_path = None
+        self.download_file_name = None
+
+    def open(self):
+        if not self.download_path : return
+        # 流程有所变更，重写此方法
+        request = self._prepare_request()
+        self._on_open_url_before()
+        ret = urllib2.urlopen(request)
+        self._save_file(ret)
+        ret.close()
+        self._on_open_url_after()
+
+    def _save_file(self, response):
+        file_name = self._get_file_name(response)
+        full_file_name = "%s%s" % (self.download_path, file_name)
+        f = open(full_file_name, 'wb')
+        meta = response.info()
+        file_size = int(meta.getheaders("Content-Length")[0])
+        print "Downloading: %s Bytes: %s" % (full_file_name, file_size)
+        os.system('cls')
+        file_size_dl = 0
+        while True:
+            buffer = response.read(self.block_sz)
+            if not buffer:
+                break
+
+            file_size_dl += len(buffer)
+            f.write(buffer)
+            status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+            status = status + chr(8)*(len(status)+1)
+            print status,
+
+        f.close()
+
+    def _get_file_name(self, response):
+        if self.download_file_name : return self.download_file_name
+        content_disposition = response.info().getheaders('Content-Disposition')
+        if content_disposition and content_disposition[0]:
+            localName = content_disposition[0].split('filename=')[1]
+            return localName
+        url_file_name = url2name(self.url)
+        if StringUtil.isNone(url_file_name) :
+            url_file_name += "." + self.ext
+        if not url_file_name : return StringUtil.get_random_str()
+        return url_file_name
+
+
+
+    def _on_open_url_before(self):
+        super(WebDownloadRequest, self)._on_open_url_before()
+        if not self.download_path : return
+        if not os.path.isdir(self.download_path) : os.makedirs(self.download_path)
+
+
+def url2name(url):
+    if not url : return None
+    url_split = urlsplit(url)
+    if not url_split.path : return url_split.netloc
+    return os.path.basename(url_split.path)
 
 driver_class_list = [webdriver.PhantomJS, webdriver.Chrome, webdriver.Firefox, webdriver.Safari,]
 
