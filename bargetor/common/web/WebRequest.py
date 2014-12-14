@@ -26,9 +26,13 @@ class WebRequest(object):
 
         self.is_need_cookes = False
         self.is_multipart_post = False
+
+        # 下载文件相关
         self.is_file_down = False
         self.download_path = None
         self.download_file_name = None
+        self.block_sz = 8192
+        self.file_ext = 'tmp'
 
         self.content = None
 
@@ -51,7 +55,10 @@ class WebRequest(object):
         request = self._prepare_request()
         self._on_open_url_before()
         ret = urllib2.urlopen(request)
-        self.content = ret.read()
+        if self.is_file_down:
+            self._save_file(ret)
+        else:
+            self.content = ret.read()
         ret.close()
         self._on_open_url_after()
 
@@ -111,29 +118,10 @@ class WebRequest(object):
         browser.close()
         return result
 
-
-class WebDownloadRequest(WebRequest):
-    """docstring for WebDownloadRequest"""
-    def __init__(self, url, params = None, headers = None):
-        super(WebDownloadRequest, self).__init__(url, params, headers)
-
-        self.block_sz = 8192
-        self.file_ext = 'tmp'
-
-        self.download_path = None
-        self.download_file_name = None
-
-    def open(self):
-        if not self.download_path : return
-        # 流程有所变更，重写此方法
-        request = self._prepare_request()
-        self._on_open_url_before()
-        ret = urllib2.urlopen(request)
-        self._save_file(ret)
-        ret.close()
-        self._on_open_url_after()
-
     def _save_file(self, response):
+        if not self.download_path : return
+        if not os.path.isdir(self.download_path) : os.makedirs(self.download_path)
+
         file_name = self._get_file_name(response)
         full_file_name = "%s%s" % (self.download_path, file_name)
         f = open(full_file_name, 'wb')
@@ -162,16 +150,9 @@ class WebDownloadRequest(WebRequest):
             return localName
         url_file_name = url2name(self.url)
         if StringUtil.isNone(url_file_name) :
-            url_file_name += "." + self.ext
+            url_file_name += "." + self.file_ext
         if not url_file_name : return StringUtil.get_random_str()
         return url_file_name
-
-
-
-    def _on_open_url_before(self):
-        super(WebDownloadRequest, self)._on_open_url_before()
-        if not self.download_path : return
-        if not os.path.isdir(self.download_path) : os.makedirs(self.download_path)
 
 
 def url2name(url):

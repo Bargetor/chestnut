@@ -682,13 +682,14 @@ class WechatGetSafeUUIDRequest(WechatRequest):
         params['token'] = self.request_token
         return params
 
-class WechatDownloadSafeQRCodeRequest(WebDownloadRequest):
+class WechatDownloadSafeQRCodeRequest(WebRequest):
     """docstring for WechatDownloadSafeQRCodeRequest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/safe/safeqrcode?action=check&type=cburl"
         super(WechatDownloadSafeQRCodeRequest, self).__init__(self.base_url)
         self.request_token = request_token
-        self.ext = 'png'
+        self.is_file_down = True
+        self.file_ext = 'png'
 
         self.ticket = None
         self.uuid = None
