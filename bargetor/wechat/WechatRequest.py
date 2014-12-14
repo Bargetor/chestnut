@@ -33,7 +33,6 @@ class WechatRequest(WebRequest):
         self.__set_header_referer()
         self.url = self._build_url()
         self.__add_url_request_token()
-
         super(WechatRequest, self).open()
 
     def __add_url_request_token(self):

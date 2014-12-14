@@ -15,10 +15,10 @@ import traceback
 log = logging.getLogger(__name__)
 
 
-class WechatCGIDataPage(WebRequest):
+class WechatCGIDataPage(WechatRequest):
     """docstring for WechatRequest"""
-    def __init__(self, url):
-        super(WechatCGIDataPage, self).__init__(url)
+    def __init__(self, request_token):
+        super(WechatCGIDataPage, self).__init__(request_token)
         self.cgi_data = None
 
     def _on_open_url_after(self):
@@ -47,9 +47,9 @@ class WechatCGIDataPage(WebRequest):
 class WechatFollowerPage(WechatCGIDataPage):
     """docstring for WechatFollowerPage"""
     def __init__(self, request_token):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&type=0&lang=zh_CN&token=%s" % request_token
-        super(WechatFollowerPage, self).__init__(self.base_url)
-        self.request_token = request_token
+        super(WechatFollowerPage, self).__init__(request_token)
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&type=0&lang=zh_CN"
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN"
         self.follower_info = self.WechatFollowerInfo()
 
     def find_all_followers(self):
@@ -80,14 +80,12 @@ class WechatFollowerPage(WechatCGIDataPage):
 
     def __request_wechat_follower_page(self, follower_page_index = 0, follower_page_size = 10):
         if not self.request_token: return
-        self.url = "%s&pagesize=%s&pageidx=%s" % (self.base_url, str(follower_page_size), str(follower_page_index))
 
         self.open()
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
-        return headers
+    def _build_url(self):
+        url = "%s&pagesize=%s&pageidx=%s" % (self.base_url, str(follower_page_size), str(follower_page_index))
+        return url
 
     def __process_follower_info_json(self, follower_info_json):
         if not follower_info_json : return
@@ -135,13 +133,12 @@ class WechatFollowerPage(WechatCGIDataPage):
             self.followers = dict()
 
 
-class WechatSettingPage(WebRequest):
+class WechatSettingPage(WechatRequest):
     """docstring for WechatSettingPage"""
     def __init__(self, request_token):
-        self.url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN&token=%s" % request_token
-        super(WechatSettingPage, self).__init__(self.url)
-
-        self.request_token = request_token
+        super(WechatSettingPage, self).__init__(request_token)
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/settingpage?t=setting/index&action=index&lang=zh_CN"
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN"
 
     def _on_open_url_after(self):
         self.dom = HTMLUtil.build_html_dom_from_str(self.content)
@@ -151,12 +148,6 @@ class WechatSettingPage(WebRequest):
     def __init_account_info(self):
         self.__parse_account_info()
         log.info(self.account_info)
-
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
-        return headers
 
     def __parse_account_info(self):
         if not self.dom: return
@@ -230,25 +221,18 @@ class WechatSettingPage(WebRequest):
 
 class WechatMaterialPage(WechatCGIDataPage):
     """docstring for WechatMaterialPage"""
-    def __init__(self, url, request_token):
-        super(WechatMaterialPage, self).__init__(url)
-
-        self.request_token = request_token
+    def __init__(self, request_token):
+        super(WechatMaterialPage, self).__init__(request_token)
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&t=media/appmsg_list&type=10&action=list&lang=zh_CN"
         self.ticket = None
         self.uin = None
         self.uin_base64 = None
         self.user_name = None
         self.nick_name = None
 
-    def open(self):
-
-        super(WechatMaterialPage, self).open()
+    def _on_open_url_after(self):
+        super(WecahtImageMaterialPage, self)._on_open_url_after()
         self._process_material_params()
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/appmsg?begin=0&count=10&t=media/appmsg_list&type=10&action=list&lang=zh_CN&token=%s" % self.request_token
-        return headers
 
     def _process_material_params(self):
         params_javascript = self._find_material_params_javascript()
@@ -277,9 +261,8 @@ class WechatMaterialPage(WechatCGIDataPage):
 class WecahtImageMaterialPage(WechatMaterialPage):
     """docstring for WecahtImageMaterialPage"""
     def __init__(self, request_token):
+        super(WecahtImageMaterialPage, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WecahtImageMaterialPage, self).__init__(self.url, request_token)
 
         self.file_count = 0
         self.file_list = dict()
@@ -311,17 +294,11 @@ class WecahtImageMaterialPage(WechatMaterialPage):
 class WechatDevSettingPage(WechatCGIDataPage):
     """docstring for WechatDevSettingPage"""
     def __init__(self, request_token):
+        super(WechatDevSettingPage, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/advanced/advanced?action=dev&t=advanced/dev&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatDevSettingPage, self).__init__(self.url)
-        self.request_token = request_token
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN"
 
         self.operation_seq = None
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=%s" % self.request_token
-        return headers
 
     def _on_open_url_after(self):
         super(WechatDevSettingPage, self)._on_open_url_after()
