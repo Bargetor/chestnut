@@ -102,7 +102,7 @@ class Wechat(object):
         print self.ticket
 
     def request_get_wechat_uuid(self):
-        request = WechatGetUUIDRequest(self.request_token)
+        request = WechatGetSafeUUIDRequest(self.request_token)
         self.uuid = request.get_uuid(self.ticket)
         print self.uuid
 
@@ -112,6 +112,11 @@ class Wechat(object):
         request.uuid = self.uuid
         request.msg_id = '201255702'
         request.download('/Users/Bargetor/Downloads/qrcode/')
+
+
+    def request_check_safe_qrcode(self):
+        request = WechatQRCodeCheckRequest(self.request_token)
+        request.check("011hN-kqqTU8nawf")
 
     def is_login(self):
         return self.login_page and self.login_page.is_login()

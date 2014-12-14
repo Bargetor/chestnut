@@ -140,7 +140,6 @@ class WebDownloadRequest(WebRequest):
         meta = response.info()
         file_size = int(meta.getheaders("Content-Length")[0])
         print "Downloading: %s Bytes: %s" % (full_file_name, file_size)
-        os.system('cls')
         file_size_dl = 0
         while True:
             buffer = response.read(self.block_sz)

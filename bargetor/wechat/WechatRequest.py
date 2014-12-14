@@ -591,6 +591,7 @@ class WechatDevServerSettingRequest(WechatRequest):
         self.callback_token = callback_token
 
         self.open()
+        print self.response_json
 
     def _build_params(self):
         params = dict()
@@ -638,12 +639,12 @@ class WechatGetTicketRequest(WechatRequest):
         params['token'] = self.request_token
         return params
 
-class WechatGetUUIDRequest(WechatRequest):
-    """docstring for WechatGetUUIDRequest"""
+class WechatGetSafeUUIDRequest(WechatRequest):
+    """docstring for WechatGetSafeUUIDRequest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/safe/safeqrconnect?1=1&lang=zh_CN"
         self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatGetUUIDRequest, self).__init__(self.url)
+        super(WechatGetSafeUUIDRequest, self).__init__(self.url)
         self.request_token = request_token
 
         self.ticket = None
@@ -658,7 +659,7 @@ class WechatGetUUIDRequest(WechatRequest):
         return self.uuid
 
     def _on_open_url_after(self):
-        super(WechatGetUUIDRequest, self)._on_open_url_after()
+        super(WechatGetSafeUUIDRequest, self)._on_open_url_after()
         self.uuid = self.response_json.get('uuid')
         self.app_name = self.response_json.get('appname')
         self.app_desc = self.response_json.get('appdesc')
@@ -684,7 +685,7 @@ class WechatGetUUIDRequest(WechatRequest):
 class WechatDownloadSafeQRCodeRequest(WebDownloadRequest):
     """docstring for WechatDownloadSafeQRCodeRequest"""
     def __init__(self, request_token):
-        self.base_url = "https://mp.weixin.qq.com/safe/safeqrcode?ticket=0bda66c92a0260d4eb9a&uuid=001TrklGU6MRNHwn&action=check&type=msgs&msgid=201255702"
+        self.base_url = "https://mp.weixin.qq.com/safe/safeqrcode?action=check&type=cburl"
         super(WechatDownloadSafeQRCodeRequest, self).__init__(self.base_url)
         self.request_token = request_token
         self.ext = 'png'
@@ -698,10 +699,45 @@ class WechatDownloadSafeQRCodeRequest(WebDownloadRequest):
         if not path : return
         self.download_path = path
         if file_name : self.download_file_name = file_name
+        self.url = self._build_url()
         super(WechatDownloadSafeQRCodeRequest, self).open()
+
+    def _build_url(self):
+        url = "%s&ticket=%s&uuid=%s&msgid=%s" % (self.base_url, self.ticket, self.uuid, self.msg_id)
+        return url
 
     def _build_headers(self):
         headers = build_wechat_base_request_headers()
         headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN&token=%s" % self.request_token
         return headers
+
+class WechatQRCodeCheckRequest(WechatRequest):
+    """docstring for WechatQRCodeCheckRequest"""
+    def __init__(self, request_token):
+        self.base_url = "https://mp.weixin.qq.com/safe/safeuuid?lang=zh_CN"
+        self.url = "%s&token=%s&timespam=%d" % (self.base_url, request_token, long(time.time()))
+        super(WechatQRCodeCheckRequest, self).__init__(self.base_url)
+        self.request_token = request_token
+        self.uuid = None
+
+    def check(self, uuid):
+        if not uuid : return
+        self.uuid = uuid
+        self.open()
+        print self.response_json
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&token=%s&lang=zh_CN" % self.request_token
+        return headers
+
+    def _build_params(self):
+        params = build_wechat_base_request_params()
+        params['type'] = 'json'
+        params['token'] = self.request_token
+        params['f'] = 'josn'
+        params['ajax'] = '1'
+        params['action'] = 'json'
+        params['uuid'] = self.uuid
+        return params
 
