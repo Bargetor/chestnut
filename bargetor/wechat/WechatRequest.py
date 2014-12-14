@@ -115,7 +115,6 @@ class WechatLoginRequest(WechatDataRequest):
     def __find_token(self):
         self.login_ret = self.response_ret
         if not self.is_login() : return None
-
         token = self.response_json['redirect_url'][44:]
 
         self.request_token = token
@@ -128,15 +127,11 @@ class WechatLoginRequest(WechatDataRequest):
 class WechatGetFollowerInfoRequest(WechatDataRequest):
     """docstring for WechatFollowerInfoRequest"""
     def __init__(self, request_token, to_fake_id):
+        super(WechatGetFollowerInfoRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=%s" % to_fake_id
-        super(WechatGetFollowerInfoRequest, self).__init__(self.base_url)
-        self.request_token = request_token
-        self.follower_info = None
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=10&pageidx=0&type=0&token=%s&lang=zh_CN" % self.request_token
-        return headers
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/contactmanage?t=user/index&pagesize=10&pageidx=0&type=0&lang=zh_CN"
+        self.follower_info = None
 
     def _build_params(self):
         params = build_wechat_base_request_params()
@@ -173,21 +168,16 @@ class WechatGetFollowerInfoRequest(WechatDataRequest):
 
 class WechatSingleSendRequest(WechatDataRequest):
     def __init__(self, request_token, to_fake_id):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response&f=json&lang=zh_CN"
-        self.base_referer_url = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatSingleSendRequest, self).__init__(self.url)
+        super(WechatSingleSendRequest, self).__init__(request_token)
 
-        self.request_token = request_token
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response&f=json&lang=zh_CN"
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&lang=zh_CN"
+
         self.to_fake_id = to_fake_id
 
     def send(self):
         self.open()
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "%s&token=%s&tofakeid=%s" % (self.base_referer_url, self.request_token, self.to_fake_id)
-        return headers
 
     def _build_params(self):
         params = build_wechat_base_request_params()
@@ -235,9 +225,11 @@ class WechatSingleSendAppMsgRequest(WechatSingleSendRequest):
 class WechatMaterialUploadRequest(WechatDataRequest):
     """docstring for WechatMaterialUploadRequest"""
     def __init__(self, request_token, user_name, ticket):
-        super(WechatMaterialUploadRequest, self).__init__(self.url)
+        super(WechatMaterialUploadRequest, self).__init__(request_token)
+
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN"
+
         self.is_multipart_post = True
-        self.request_token = request_token
         self.user_name = user_name
         self.ticket = ticket
 
@@ -264,44 +256,22 @@ class WechatMaterialUploadRequest(WechatDataRequest):
         params['file'] = open(self.file_name, 'rb')
         return params
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN&token=%s" % self.request_token
-        return headers
-
 class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
     """docstring for WechatImageMaterialUploadRequest"""
     def __init__(self, request_token, user_name, ticket):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
-        self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
         super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/filetransfer?action=upload_material&f=json&writetype=doublewrite&groupid=1&lang=zh_CN"
+
+    def _build_url():
+        url = self.url = "%s&ticket_id=%s&ticket=%s" % (self.base_url, user_name, ticket)
+        return url
 
 class WechatGetMaterialListDataRequest(WechatDataRequest):
     """docstring for WechatGetMaterialListDataRequest"""
-    # def __init__(self, request_token):
-    #     super(WechatGetMaterialListDataRequest, self).__init__(None)
-    #     self.request_token = request_token
-
-    #     self.begin = 0
-    #     self.count = 10
-    #     self.total_count = -1
-
-    # def get(self):
-    #     pass
-
-    # def _get_data(self):
-    #     self.url = self._build_url()
-    #     self.open()
-
-    # def _on_open_url_after(self):
-    #     pass
-
-    # def _build_url(self):
-    #     url = self.base_url + "&begin=%s&count=%s" % (str(self.begin), str(self.count))
-    #     return url
     def __init__(self, request_token):
-        super(WechatGetMaterialListDataRequest, self).__init__(self.base_url)
-        self.request_token = request_token
+        super(WechatGetMaterialListDataRequest, self).__init__(request_token)
+
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN"
 
         self.begin = 0
         self.count = 10
@@ -342,18 +312,12 @@ class WechatGetMaterialListDataRequest(WechatDataRequest):
         return url
 
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/home?t=home/index&lang=zh_CN&token=' + self.request_token
-        return headers
-
 
 class WechatGetImageListRequest(WechatGetMaterialListDataRequest):
     """docstring for WechatGetImageListRequest"""
     def __init__(self, request_token):
+        super(WechatGetImageListRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/filepage?1=1&lang=zh_CN&lang=zh_CN&f=json&ajax=1&random=0.314140283735469&group_id=1&type=2"
-        super(WechatGetImageListRequest, self).__init__(self.base_url)
-        self.request_token = request_token
 
     def _get_data(self):
         datas = []
@@ -390,9 +354,9 @@ class WechatGetImageListRequest(WechatGetMaterialListDataRequest):
 class WechatGetAppMsgListRequest(WechatGetMaterialListDataRequest):
     """docstring for WechatGetPhotoNewsListRequest"""
     def __init__(self, request_token):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?type=10&action=list&f=json&lang=zh_CN&lang=zh_CN&f=json&ajax=1"
         super(WechatGetAppMsgListRequest, self).__init__(self.base_url)
-        self.request_token = request_token
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?type=10&action=list&f=json&lang=zh_CN&lang=zh_CN&f=json&ajax=1"
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN"
 
     def _get_data(self):
         return self.__process_app_msg_info()
@@ -405,11 +369,6 @@ class WechatGetAppMsgListRequest(WechatGetMaterialListDataRequest):
         cnt = file_cnt.get('app_msg_cnt')
         if not cnt : return -1
         return cnt
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/filepage?type=2&begin=0&count=12&t=media/img_list&lang=zh_CN&token=%s" % self.request_token
-        return headers
 
     def _on_open_url_after(self):
         super(WechatGetAppMsgListRequest, self)._on_open_url_after()
@@ -466,11 +425,9 @@ class WechatAppMsgProcessRequest(WechatDataRequest):
     UPDATE_METHOD = 'update'
 
     def __init__(self, request_token):
-        self.base_url = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?t=ajax-response&type=10&lang=zh_CN&token=" + request_token
-        self.url = self.base_url
-        super(WechatAppMsgProcessRequest, self).__init__(self.url)
-        self.request_token = request_token
-
+        super(WechatAppMsgProcessRequest, self).__init__(request_token)
+        self.base_url = "https://mp.weixin.qq.com/cgi-bin/operate_appmsg?t=ajax-response&type=10&lang=zh_CN"
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=10&isMul=1&isNew=1&lang=zh_CN"
         self.app_msg = WechatAppMsg()
         # 你问我这里为什么要记录发送和响应时间？我只能告诉你，狗日的微信没有返回图文ID，奶奶的腿
         self.request_send_time = 9999999999
@@ -513,11 +470,6 @@ class WechatAppMsgProcessRequest(WechatDataRequest):
         self.request_response_time = long(time.time())
         super(WechatAppMsgProcessRequest, self)._on_open_url_after()
 
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit&action=edit&type=10&isMul=1&isNew=1&lang=zh_CN&token=%s" % self.request_token
-        return headers
 
     def _build_params(self):
         params = build_wechat_base_request_params()
@@ -612,10 +564,9 @@ class WechatAppMsgCreateRequest(WechatDataRequest):
 class WechatDevServerSettingRequest(WechatDataRequest):
     """docstring for WechatDevSettingRequest"""
     def __init__(self, request_token, operation_seq):
+        super(WechatDevServerSettingRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/advanced/callbackprofile?t=ajax-response&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatDevServerSettingRequest, self).__init__(self.url)
-        self.request_token = request_token
+        self.referer_url = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN"
         self.operation_seq = operation_seq
 
         self.server_url = None
@@ -640,19 +591,13 @@ class WechatDevServerSettingRequest(WechatDataRequest):
         params['operation_seq'] = self.operation_seq
         return params
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=%s" % self.request_token
-        return headers
 
 class WechatGetTicketRequest(WechatDataRequest):
     """docstring for WechatGetTicketResquest"""
     def __init__(self, request_token):
+        super(WechatGetTicketRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/misc/safeassistant?1=1&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatGetTicketRequest, self).__init__(self.url)
-        self.request_token = request_token
-
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN"
         self.ticket = None
         self.operation_seq = None
 
@@ -665,11 +610,6 @@ class WechatGetTicketRequest(WechatDataRequest):
         self.ticket = self.response_json.get('ticket')
         self.operation_seq = self.response_json.get('operation_seq')
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN" % self.request_token
-        return headers
-
     def _build_params(self):
         params = build_wechat_base_request_params()
         params['ajax'] = '1'
@@ -680,11 +620,9 @@ class WechatGetTicketRequest(WechatDataRequest):
 class WechatGetSafeUUIDRequest(WechatDataRequest):
     """docstring for WechatGetSafeUUIDRequest"""
     def __init__(self, request_token):
+        super(WechatGetSafeUUIDRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/safe/safeqrconnect?1=1&lang=zh_CN"
-        self.url = "%s&token=%s" % (self.base_url, request_token)
-        super(WechatGetSafeUUIDRequest, self).__init__(self.url)
-        self.request_token = request_token
-
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN"
         self.ticket = None
         self.uuid = None
         self.app_name = None
@@ -702,11 +640,6 @@ class WechatGetSafeUUIDRequest(WechatDataRequest):
         self.app_name = self.response_json.get('appname')
         self.app_desc = self.response_json.get('appdesc')
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&token=%s&lang=zh_CN" % self.request_token
-        return headers
-
     def _build_params(self):
         params = build_wechat_base_request_params()
         params['ajax'] = '1'
@@ -723,9 +656,9 @@ class WechatGetSafeUUIDRequest(WechatDataRequest):
 class WechatDownloadSafeQRCodeRequest(WebRequest):
     """docstring for WechatDownloadSafeQRCodeRequest"""
     def __init__(self, request_token):
+        super(WechatDownloadSafeQRCodeRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/safe/safeqrcode?action=check&type=cburl"
-        super(WechatDownloadSafeQRCodeRequest, self).__init__(self.base_url)
-        self.request_token = request_token
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN"
         self.is_file_down = True
         self.file_ext = 'png'
 
@@ -745,30 +678,23 @@ class WechatDownloadSafeQRCodeRequest(WebRequest):
         url = "%s&ticket=%s&uuid=%s&msgid=%s" % (self.base_url, self.ticket, self.uuid, self.msg_id)
         return url
 
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN&token=%s" % self.request_token
-        return headers
-
 class WechatQRCodeCheckRequest(WechatDataRequest):
     """docstring for WechatQRCodeCheckRequest"""
     def __init__(self, request_token):
+        super(WechatQRCodeCheckRequest, self).__init__(request_token)
         self.base_url = "https://mp.weixin.qq.com/safe/safeuuid?lang=zh_CN"
-        self.url = "%s&token=%s&timespam=%d" % (self.base_url, request_token, long(time.time()))
-        super(WechatQRCodeCheckRequest, self).__init__(self.base_url)
-        self.request_token = request_token
+        self.referer_url = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN"
         self.uuid = None
+
+    def _build_url(self):
+        url = "%s&timespam=%d" % (self.base_url, long(time.time()))
+        return url
 
     def check(self, uuid):
         if not uuid : return
         self.uuid = uuid
         self.open()
         print self.response_json
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&token=%s&lang=zh_CN" % self.request_token
-        return headers
 
     def _build_params(self):
         params = build_wechat_base_request_params()
