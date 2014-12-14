@@ -8,7 +8,7 @@ import urllib2
 import cookielib
 import MultipartPostHandler
 
-from bargetor.common.web.WebRequest import WebRequest, WebDownloadRequest
+from bargetor.common.web.WebRequest import WebRequest
 from bargetor.wechat.Common import build_wechat_base_request_headers, build_wechat_base_request_params
 from bargetor.wechat.WechatModel import *
 from bargetor.common import HTMLUtil, ReUtil, StringUtil, ArrayUtil
@@ -19,18 +19,60 @@ import traceback
 
 log = logging.getLogger(__name__)
 
-
 class WechatRequest(WebRequest):
     """docstring for WechatRequest"""
-    def __init__(self, url, params = None, headers = None):
-        super(WechatRequest, self).__init__(url)
+    def __init__(self, request_token):
+        super(WechatRequest, self).__init__(None)
+        self.request_token = request_token
+
+        self.base_url = None
+        self.url = self.base_url
+        self.referer_url = None
+
+    def open(self):
+        self.__set_header_referer()
+        self.url = self._build_url()
+        self.__add_url_request_token()
+
+        super(WechatRequest, self).open()
+
+    def __add_url_request_token(self):
+        if not self.url : return
+        if not self.request_token : return
+        self.url = "%s&token=%s" % (self.url, self.request_token)
+
+    def _build_url(self):
+        return self.base_url
+
+    def _build_header_referer(self):
+        if not self.referer_url : return None
+        if not self.request_token : return self.referer_url
+        return "%s&token=%s" % (self.referer_url, self.request_token)
+
+    def __set_header_referer(self):
+        header = dict()
+        referer_url = self._build_header_referer()
+        if not referer_url : return
+        header['Referer'] = referer_url
+        self.headers = ArrayUtil.merged_dict(self.headers, header)
+
+    def _build_headers(self):
+        headers = build_wechat_base_request_headers()
+        return headers
+
+
+
+class WechatDataRequest(WechatRequest):
+    """docstring for WechatDataRequest"""
+    def __init__(self, request_token):
+        super(WechatDataRequest, self).__init__(request_token)
 
         self.response_json = None
         self.response_ret = 99999999
         self.response_msg = None
 
     def _on_open_url_after(self):
-        super(WechatRequest, self)._on_open_url_after()
+        super(WechatDataRequest, self)._on_open_url_after()
         self.response_json = json.loads(self.content)
         if not self.response_json : return
         if self.response_json.get('base_resp'):
@@ -42,10 +84,11 @@ class WechatRequest(WebRequest):
             self.response_ret = self.response_json.get('ret')
             return
 
-class WechatLoginRequest(WechatRequest):
+class WechatLoginRequest(WechatDataRequest):
     def __init__(self, username = None, password = None):
-        self.url = 'https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN'
-        super(WechatLoginRequest, self).__init__(self.url)
+        super(WechatLoginRequest, self).__init__(None)
+        self.base_url = 'https://mp.weixin.qq.com/cgi-bin/login?lang=zh_CN'
+        self.referer_url = "https://mp.weixin.qq.com/cgi-bin/loginpage?t=wxm2-login&lang=zh_CN"
         self.is_need_cookes = True
 
         self.username = username
@@ -55,12 +98,6 @@ class WechatLoginRequest(WechatRequest):
 
         self.setting_page = None
         self.follower_page = None
-
-    def _build_headers(self):
-        headers = build_wechat_base_request_headers()
-        headers['Accept-Encoding'] = 'gzip,deflate,sdch'
-        headers['Referer'] = 'https://mp.weixin.qq.com/cgi-bin/loginpage?t=wxm2-login&lang=zh_CN'
-        return headers
 
     def _build_params(self):
         params = {'username':self.username, 'pwd':self.password, 'imgcode':'', 'f':'json'}
@@ -82,12 +119,13 @@ class WechatLoginRequest(WechatRequest):
         token = self.response_json['redirect_url'][44:]
 
         self.request_token = token
+        print token
         return token
 
     def is_login(self):
         return self.login_ret == 0
 
-class WechatGetFollowerInfoRequest(WechatRequest):
+class WechatGetFollowerInfoRequest(WechatDataRequest):
     """docstring for WechatFollowerInfoRequest"""
     def __init__(self, request_token, to_fake_id):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/getcontactinfo?t=ajax-getcontactinfo&lang=zh_CN&fakeid=%s" % to_fake_id
@@ -133,7 +171,7 @@ class WechatGetFollowerInfoRequest(WechatRequest):
         return info
 
 
-class WechatSingleSendRequest(WechatRequest):
+class WechatSingleSendRequest(WechatDataRequest):
     def __init__(self, request_token, to_fake_id):
         self.base_url = "https://mp.weixin.qq.com/cgi-bin/singlesend?t=ajax-response&f=json&lang=zh_CN"
         self.base_referer_url = "https://mp.weixin.qq.com/cgi-bin/singlesendpage?t=message/send&action=index&lang=zh_CN"
@@ -194,7 +232,7 @@ class WechatSingleSendAppMsgRequest(WechatSingleSendRequest):
         params['appmsgid'] = self.app_msg_id
         return params
 
-class WechatMaterialUploadRequest(WechatRequest):
+class WechatMaterialUploadRequest(WechatDataRequest):
     """docstring for WechatMaterialUploadRequest"""
     def __init__(self, request_token, user_name, ticket):
         super(WechatMaterialUploadRequest, self).__init__(self.url)
@@ -238,7 +276,7 @@ class WechatImageMaterialUploadRequest(WechatMaterialUploadRequest):
         self.url = "%s&ticket_id=%s&ticket=%s&token=%s" % (self.base_url, user_name, ticket, request_token)
         super(WechatImageMaterialUploadRequest, self).__init__(request_token, user_name, ticket)
 
-class WechatGetMaterialListDataRequest(WechatRequest):
+class WechatGetMaterialListDataRequest(WechatDataRequest):
     """docstring for WechatGetMaterialListDataRequest"""
     # def __init__(self, request_token):
     #     super(WechatGetMaterialListDataRequest, self).__init__(None)
@@ -422,7 +460,7 @@ class WechatGetAppMsgListRequest(WechatGetMaterialListDataRequest):
 
 
 
-class WechatAppMsgProcessRequest(WechatRequest):
+class WechatAppMsgProcessRequest(WechatDataRequest):
     """docstring for WechatPhotoNewsAddRequest, for wechat app msg create or update"""
     CREATE_METHOD = 'create'
     UPDATE_METHOD = 'update'
@@ -514,7 +552,7 @@ class WechatAppMsgProcessRequest(WechatRequest):
         params['count'] = str(len(app_msg_items))
         return ArrayUtil.merged_dict(base_params, params)
 
-class WechatAppMsgCreateRequest(WechatRequest):
+class WechatAppMsgCreateRequest(WechatDataRequest):
     """docstring for WechatAppMsgCreateRequest
     由于微信在创建图文信息时没有返回图文ID，故这个类是一个讨巧方式的存在
     先以标题为一随机数创建，再取图文列表，找到该随机数，再修改"""
@@ -571,7 +609,7 @@ class WechatAppMsgCreateRequest(WechatRequest):
 
 
 
-class WechatDevServerSettingRequest(WechatRequest):
+class WechatDevServerSettingRequest(WechatDataRequest):
     """docstring for WechatDevSettingRequest"""
     def __init__(self, request_token, operation_seq):
         self.base_url = "https://mp.weixin.qq.com/advanced/callbackprofile?t=ajax-response&lang=zh_CN"
@@ -607,7 +645,7 @@ class WechatDevServerSettingRequest(WechatRequest):
         headers['Referer'] = "https://mp.weixin.qq.com/advanced/advanced?action=interface&t=advanced/interface&lang=zh_CN&token=%s" % self.request_token
         return headers
 
-class WechatGetTicketRequest(WechatRequest):
+class WechatGetTicketRequest(WechatDataRequest):
     """docstring for WechatGetTicketResquest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/misc/safeassistant?1=1&lang=zh_CN"
@@ -639,7 +677,7 @@ class WechatGetTicketRequest(WechatRequest):
         params['token'] = self.request_token
         return params
 
-class WechatGetSafeUUIDRequest(WechatRequest):
+class WechatGetSafeUUIDRequest(WechatDataRequest):
     """docstring for WechatGetSafeUUIDRequest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/safe/safeqrconnect?1=1&lang=zh_CN"
@@ -712,7 +750,7 @@ class WechatDownloadSafeQRCodeRequest(WebRequest):
         headers['Referer'] = "https://mp.weixin.qq.com/cgi-bin/masssendpage?t=mass/send&lang=zh_CN&token=%s" % self.request_token
         return headers
 
-class WechatQRCodeCheckRequest(WechatRequest):
+class WechatQRCodeCheckRequest(WechatDataRequest):
     """docstring for WechatQRCodeCheckRequest"""
     def __init__(self, request_token):
         self.base_url = "https://mp.weixin.qq.com/safe/safeuuid?lang=zh_CN"

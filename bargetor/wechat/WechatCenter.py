@@ -55,9 +55,9 @@ class WechatCenter(object):
         # app_msgs = wechat.request_get_app_msgs_list()
         # wechat.request_update_app_msg(app_msgs[0])
         # wechat.request_get_wechat_image_list()
-        wechat.request_get_wechat_ticket()
-        wechat.request_get_wechat_uuid()
-        wechat.request_download_safe_qrcode()
+        # wechat.request_get_wechat_ticket()
+        # wechat.request_get_wechat_uuid()
+        # wechat.request_download_safe_qrcode()
         # wechat.request_check_safe_qrcode()
 
 
