@@ -40,9 +40,9 @@ class TaskCenter(object):
     def mark_todo(self, todo_method, **kwargs):
         setattr(todo_method, self.task_todo_flag, kwargs)
 
-    def start_task(self, task_class):
+    def start_task(self, task_class, *args, **kwargs):
         task = self.get_task_by_target_class(task_class)
-        task.start()
+        task.start(*args, **kwargs)
 
 
 class Task(threading.Thread):
@@ -52,6 +52,9 @@ class Task(threading.Thread):
         self.task_class = task_class
         self.is_async = False
         self.todo_dict = {}
+
+        self.task_args = ()
+        self.task_kwargs = {}
 
         self.__reg_task_class_instance_method()
 
@@ -72,21 +75,23 @@ class Task(threading.Thread):
         self.todo_dict[todo.get_todo_name()] = todo
         return todo
 
-    def start(self):
+    def start(self, *args, **kwargs):
+        self.task_args = args
+        self.task_kwargs = kwargs
         if self.is_async:
             super(Task, self).start()
         else:
-            self.__run_sync()
+            self.__run_sync(*self.task_args, **self.task_kwargs)
 
-    def __run_sync(self):
-        task_obj = self.task_class()
+    def __run_sync(self, *args, **kwargs):
+        task_obj = self.task_class(*args, **kwargs)
         for method_name in self.todo_dict.keys():
             method = getattr(task_obj, method_name)
             if not method : continue
             method()
 
     def run(self):
-        self.__run_sync()
+        self.__run_sync(*self.task_args, **self.task_kwargs)
 
 
 class ToDo(object):
@@ -157,15 +162,17 @@ def is_instance_method(method):
 @task(is_async = True)
 class Test(object):
     """docstring for Test"""
-    def __init__(self):
+    def __init__(self, print_str):
         super(Test, self).__init__()
+        self.print_str = print_str
 
     @todo
     def c(self):
+        print self.print_str
         print "c"
 
     @todo
     def b(self):
         print "b"
 
-TaskCenter().start_task(Test)
+TaskCenter().start_task(Test, print_str = 'd')
