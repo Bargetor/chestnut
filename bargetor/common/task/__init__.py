@@ -2,6 +2,7 @@
 
 from functools import wraps
 import threading
+import time
 
 class TaskCenter(object):
     """docstring for TaskCenter"""
@@ -19,14 +20,22 @@ class TaskCenter(object):
         if not is_class(target_task_class) : return
         task = self._task_set.get(target_task_class.__name__)
         if task : return
+        task = self.__build_task(target_task_class, is_async)
+        self._task_set[target_task_class.__name__] = task
+        return task
+
+    def __build_task(self, target_task_class, is_async = False):
         task =  Task(target_task_class)
         task.is_async = is_async
-        self._task_set[target_task_class.__name__] = task
         return task
 
     def get_task_by_target_class(self, target_task_class):
         if not target_task_class : return None
-        return self._task_set.get(target_task_class.__name__)
+        task = self._task_set.get(target_task_class.__name__)
+        if not task : return None
+        # 复制一个任务
+        result = self.__build_task(task.task_class, task.is_async)
+        return result
 
     # def reg_todo_method(self, method, is_check = False, goto = None, is_once = True, check_count = 1):
     #     if not method or not is_instance_methon(method) : return
@@ -40,15 +49,23 @@ class TaskCenter(object):
     def mark_todo(self, todo_method, **kwargs):
         setattr(todo_method, self.task_todo_flag, kwargs)
 
-    def start_task(self, task_class, *args, **kwargs):
+    def build_task(self, task_class):
         task = self.get_task_by_target_class(task_class)
+        return task
+
+    def start_task(self, task_class, *args, **kwargs):
+        task = self.build_task(task_class, *args, **kwargs)
         task.start(*args, **kwargs)
+        return task
 
 
 class Task(threading.Thread):
     """docstring for Task"""
     def __init__(self, task_class):
         super(Task, self).__init__()
+        self.is_stop = False
+        self.is_pause = False
+
         self.task_class = task_class
         self.is_async = False
         self.todo_dict = {}
@@ -86,12 +103,28 @@ class Task(threading.Thread):
     def __run_sync(self, *args, **kwargs):
         task_obj = self.task_class(*args, **kwargs)
         for method_name in self.todo_dict.keys():
+            self.__check_start()
+            if self.is_stop : break
             method = getattr(task_obj, method_name)
             if not method : continue
             method()
 
+    def __check_start(self):
+        while self.is_pause:
+            time.sleep(0.2)
+            if self.is_stop : return
+
     def run(self):
         self.__run_sync(*self.task_args, **self.task_kwargs)
+
+    def stop(self):
+        self.is_stop = True
+
+    def pause(self):
+        self.is_pause = True
+
+    def restart(self):
+        self.is_pause = False
 
 
 class ToDo(object):
@@ -175,4 +208,10 @@ class Test(object):
     def b(self):
         print "b"
 
-TaskCenter().start_task(Test, print_str = 'd')
+task = TaskCenter().build_task(Test)
+task.pause()
+task.start(print_str = 'd')
+time.sleep(0.3)
+task.restart()
+time.sleep(0.6)
+task.stop()
